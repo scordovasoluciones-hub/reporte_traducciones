@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reporte de Traducciones · Engagement — Compassion Perú</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{
+  --bg:#0a1730; --bg2:#0d1d3d; --panel:#12244a; --panel2:#16294f; --line:#26386090;
+  --txt:#eaf0fb; --mut:#93a6c9; --dim:#5f739a;
+  --blue:#4fa3f7; --blue2:#7ed0ff; --amber:#f4a93b; --red:#e5595b; --green:#46c79a;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:
+    radial-gradient(1200px 600px at 80% -5%, #16345f55, transparent),
+    radial-gradient(900px 500px at 0% 5%, #10265033, transparent),
+    var(--bg);
+  color:var(--txt); font-family:'Inter',system-ui,sans-serif; line-height:1.55;
+  -webkit-font-smoothing:antialiased; padding-bottom:60px}
+.wrap{max-width:1180px;margin:0 auto;padding:0 22px}
+h1,h2,h3,.num,.eyebrow{font-family:'Space Grotesk',sans-serif}
+
+/* ---- header ---- */
+header{position:sticky;top:0;z-index:20;
+  background:linear-gradient(180deg,#0a1730f2,#0a1730d0 70%,#0a173000);
+  backdrop-filter:blur(6px);padding:20px 0 14px;border-bottom:1px solid var(--line)}
+.hrow{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:13px}
+.logo{width:40px;height:40px;flex:0 0 40px;border-radius:11px;
+  background:linear-gradient(135deg,var(--blue),#2b6fd6);display:grid;place-items:center;
+  box-shadow:0 4px 18px #2b6fd655}
+.logo svg{width:24px;height:24px}
+h1{font-size:20px;font-weight:600;letter-spacing:-.2px}
+.sub{color:var(--mut);font-size:12.5px;margin-top:1px}
+.stamp{text-align:right;color:var(--dim);font-size:11px;line-height:1.4}
+.stamp b{color:var(--blue2);font-weight:600}
+
+/* ---- kpi strip ---- */
+.kstrip{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-top:16px}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:12px 13px;position:relative;overflow:hidden}
+.kpi::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--blue)}
+.kpi.a::before{background:var(--amber)} .kpi.r::before{background:var(--red)} .kpi.g::before{background:var(--green)}
+.kpi .num{font-size:22px;font-weight:700;letter-spacing:-.5px}
+.kpi.a .num{color:var(--amber)} .kpi.r .num{color:var(--red)} .kpi.g .num{color:var(--green)} .kpi .num{color:var(--blue2)}
+.kpi .lbl{font-size:10.5px;color:var(--mut);margin-top:2px;text-transform:uppercase;letter-spacing:.4px}
+
+/* ---- sections ---- */
+section{margin-top:44px}
+.eyebrow{font-size:11px;letter-spacing:2.5px;color:var(--blue);text-transform:uppercase;font-weight:600;margin-bottom:6px;display:flex;align-items:center;gap:9px}
+.eyebrow::before{content:'';width:26px;height:2px;background:var(--blue);display:inline-block}
+h2{font-size:26px;font-weight:600;letter-spacing:-.6px;margin-bottom:5px}
+.lead{color:var(--mut);font-size:14.5px;max-width:760px;margin-bottom:20px}
+.card{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);border-radius:18px;padding:22px 22px 18px}
+.card h3{font-size:15px;font-weight:600;margin-bottom:2px}
+.card .h3sub{color:var(--mut);font-size:12.5px;margin-bottom:16px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+.cv{position:relative;width:100%}
+.h280{height:280px} .h230{height:230px} .h320{height:320px} .h340{height:340px}
+
+/* projection highlight */
+.hero-proj{border:1px solid #f4a93b40;box-shadow:0 0 0 1px #f4a93b18, 0 10px 40px -12px #00000060}
+.toggle{display:inline-flex;gap:4px;background:#0c1c3c;border:1px solid var(--line);border-radius:10px;padding:4px;margin-left:auto}
+.toggle button{background:none;border:0;color:var(--mut);font-family:'Space Grotesk';font-size:12.5px;font-weight:600;
+  padding:6px 12px;border-radius:7px;cursor:pointer;transition:.15s}
+.toggle button.on{background:var(--amber);color:#241503}
+.cardhead{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+.cardhead h3{margin:0} .cardhead .h3sub{margin:0}
+.peakcalls{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px}
+.pc{background:#0c1c3c;border:1px solid var(--line);border-radius:12px;padding:13px 15px}
+.pc .t{font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.5px}
+.pc .v{font-family:'Space Grotesk';font-size:20px;font-weight:700;margin-top:3px}
+.pc.peak .v{color:var(--amber)} .pc.low .v{color:var(--blue2)} .pc.avg .v{color:var(--green)}
+.pc .d{font-size:11.5px;color:var(--dim);margin-top:2px}
+
+/* insights */
+.ins{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.insight{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);border-radius:15px;padding:18px 19px;position:relative}
+.insight .tag{font-family:'Space Grotesk';font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;padding:3px 9px;border-radius:20px;display:inline-block;margin-bottom:9px}
+.tag.op{background:#4fa3f722;color:var(--blue2)} .tag.cap{background:#f4a93b22;color:var(--amber)}
+.tag.q{background:#e5595b22;color:#ff9092} .tag.win{background:#46c79a22;color:var(--green)}
+.insight h4{font-family:'Space Grotesk';font-size:15px;font-weight:600;margin-bottom:5px}
+.insight p{font-size:13.3px;color:var(--mut)}
+.insight b{color:var(--txt);font-weight:600}
+
+/* caveats */
+.caveat{background:#3a1d0e40;border:1px solid #f4a93b33;border-radius:14px;padding:16px 19px;margin-top:16px}
+.caveat h4{font-family:'Space Grotesk';font-size:13.5px;color:var(--amber);margin-bottom:8px;display:flex;gap:8px;align-items:center}
+.caveat ul{list-style:none;font-size:12.8px;color:var(--mut)}
+.caveat li{padding:3px 0 3px 18px;position:relative}
+.caveat li::before{content:'▸';position:absolute;left:0;color:var(--amber)}
+.caveat b{color:var(--txt)}
+
+footer{margin-top:50px;padding-top:22px;border-top:1px solid var(--line);color:var(--dim);font-size:11.5px;text-align:center}
+
+/* ---- filter bar ---- */
+.filterbar{display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end;margin-top:16px;padding:14px 16px;
+  background:var(--panel);border:1px solid var(--line);border-radius:13px}
+.fgroup{display:flex;flex-direction:column;gap:4px}
+.fgroup label{font-size:10.5px;color:var(--mut);text-transform:uppercase;letter-spacing:.4px}
+.fgroup select,.fgroup input[type=number]{background:#0c1c3c;color:var(--txt);border:1px solid var(--line);
+  border-radius:8px;padding:7px 9px;font-family:'Inter',sans-serif;font-size:12.5px;min-width:130px}
+.fgroup select:focus,.fgroup input:focus{outline:1px solid var(--blue)}
+.fbtn{background:none;border:1px solid var(--line);color:var(--mut);border-radius:8px;padding:8px 13px;
+  font-family:'Space Grotesk';font-size:12px;font-weight:600;cursor:pointer;transition:.15s}
+.fbtn:hover{border-color:var(--blue);color:var(--blue2)}
+.fbtn.primary{background:var(--blue);border-color:var(--blue);color:#06152e}
+.fspacer{flex:1 1 auto}
+.filecol{display:flex;flex-direction:column;gap:4px}
+.filecol label{font-size:10.5px;color:var(--mut);text-transform:uppercase;letter-spacing:.4px}
+#fileStatus{font-size:11px;color:var(--dim);max-width:230px}
+#fileStatus.err{color:var(--red)}
+#fileStatus.ok{color:var(--green)}
+.previewbar{display:none;align-items:center;gap:10px;background:#3a1d0e55;border:1px solid #f4a93b55;
+  border-radius:11px;padding:10px 16px;margin-top:12px;font-size:12.5px;color:var(--amber)}
+.previewbar.on{display:flex}
+.previewbar b{color:var(--txt)}
+.activefilters{font-size:11.5px;color:var(--blue2);margin-top:8px;min-height:14px}
+
+/* ---- projection table & objetivo ---- */
+.projrow{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;margin:14px 0 6px}
+.objbox{display:flex;flex-direction:column;gap:4px}
+.objbox label{font-size:10.5px;color:var(--mut);text-transform:uppercase;letter-spacing:.4px}
+.objbox .orow{display:flex;gap:8px;align-items:center}
+.objbox input{width:120px;background:#0c1c3c;color:var(--txt);border:1px solid var(--line);border-radius:8px;
+  padding:7px 9px;font-family:'Space Grotesk';font-size:13px}
+.objhint{font-size:11px;color:var(--dim)}
+table.ptab{width:100%;border-collapse:collapse;margin-top:14px;font-size:12px}
+table.ptab th,table.ptab td{padding:7px 9px;text-align:right;border-bottom:1px solid var(--line)}
+table.ptab th:first-child,table.ptab td:first-child{text-align:left}
+table.ptab th{color:var(--mut);font-weight:600;font-size:10.5px;text-transform:uppercase;letter-spacing:.3px}
+table.ptab td.real{color:var(--green)}
+table.ptab td.fc{color:var(--blue2)}
+table.ptab tr.realrow td{background:#46c79a12}
+.qualproj{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+
+@media(max-width:900px){
+  .kstrip{grid-template-columns:repeat(3,1fr)} .grid2,.grid3,.ins,.qualproj{grid-template-columns:1fr}
+  .peakcalls{grid-template-columns:1fr}
+  h2{font-size:22px}
+  .filterbar{flex-direction:column;align-items:stretch}
+  .fgroup select,.fgroup input{min-width:0;width:100%}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="hrow">
+      <div class="brand">
+        <div class="logo"><svg viewBox="0 0 24 24" fill="none"><path d="M4 5h11l-2.5 3.5L15 12H4z" fill="#fff" opacity=".95"/><path d="M4 5v14" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg></div>
+        <div>
+          <h1>Reporte de Traducciones</h1>
+          <div class="sub">Área de Engagement (SDS) · Compassion International Perú</div>
+        </div>
+      </div>
+      <div class="stamp"><span id="stampRange"></span><br><span id="stampMeses"></span><br><span id="gen"></span></div>
+    </div>
+    <div class="kstrip" id="kstrip"></div>
+
+    <div class="filterbar">
+      <div class="fgroup"><label>FY desde</label><select id="fFyFrom"></select></div>
+      <div class="fgroup"><label>FY hasta</label><select id="fFyTo"></select></div>
+      <div class="fgroup"><label>Proveedor</label><select id="fVendor"></select></div>
+      <div class="fgroup"><label>Traductor</label><select id="fTrad"></select></div>
+      <div class="fgroup"><label>Plantilla</label><select id="fTemp"></select></div>
+      <button class="fbtn" id="btnClearFilters">Limpiar filtros</button>
+      <div class="fspacer"></div>
+      <div class="filecol">
+        <label>Cargar Excel / CSV (vista previa)</label>
+        <input type="file" id="fileUpload" accept=".xlsx,.xls,.csv">
+        <div id="fileStatus"></div>
+      </div>
+    </div>
+    <div class="activefilters" id="activeFilters"></div>
+    <div class="previewbar" id="previewBar">
+      ⚠ Estás viendo una <b>vista previa</b> de <span id="previewFile"></span> — solo en tu navegador, nadie más la ve.
+      Para publicarla, reemplaza el CSV en <code>datos/</code>, corre <code>generar.py</code> y haz push.
+      <button class="fbtn" id="btnBackToPublished" style="margin-left:auto">Volver a datos publicados</button>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- TENDENCIA -->
+  <section>
+    <div class="eyebrow">01 · Pulso operativo</div>
+    <h2>El volumen tiene un latido: diciembre manda</h2>
+    <p class="lead">Cuatro años de traducciones mes a mes. El patrón es consistente y predecible — un pico marcado de fin de año (cartas de Navidad) y valles en agosto y febrero. Esa estacionalidad es la base de toda la planificación de capacidad.</p>
+    <div class="card">
+      <h3>Volumen mensual de traducciones · <span id="trendRange"></span></h3>
+      <div class="h3sub">Cada punto es un mes. La banda naranja resalta los picos de noviembre–diciembre.</div>
+      <div class="cv h320"><canvas id="cTrend"></canvas></div>
+    </div>
+  </section>
+
+  <!-- ESTACIONALIDAD -->
+  <section>
+    <div class="eyebrow">02 · Estacionalidad</div>
+    <h2>Perfil típico del año fiscal</h2>
+    <p class="lead">Promedio por mes fiscal (Jul→Jun), depurando el dato atípico de Jul 2024. Diciembre concentra <b>~1.6×</b> el mes promedio; agosto y febrero caen a <b>~0.6×</b>. La distancia entre pico y valle es de más del doble.</p>
+    <div class="grid2">
+      <div class="card">
+        <h3>Volumen promedio por mes fiscal</h3>
+        <div class="h3sub">Media de FY2023–FY2026</div>
+        <div class="cv h280"><canvas id="cSeason"></canvas></div>
+      </div>
+      <div class="card">
+        <h3>Volumen total por año fiscal</h3>
+        <div class="h3sub">Demanda anual estable, en torno a 330–360k traducciones</div>
+        <div class="cv h280"><canvas id="cAnnual"></canvas></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROYECCION VOLUMEN + TRADUCTORES -->
+  <section>
+    <div class="eyebrow">03 · Proyección <span id="projEye"></span> — la pregunta de negocio</div>
+    <h2>¿Cuántos traductores necesito, y cuándo?</h2>
+    <p class="lead">Proyección del próximo año fiscal combinando la demanda anual esperada con el perfil estacional. Los meses ya cerrados se muestran como reales; el resto es pronóstico. La necesidad de traductores se deriva de la productividad por traductor — usa el selector para ver el escenario.</p>
+
+    <div class="card hero-proj">
+      <div class="cardhead">
+        <div>
+          <h3>Necesidad de traductores por mes · <span id="projTitle"></span></h3>
+          <div class="h3sub">Barras: volumen proyectado · Línea: traductores necesarios según productividad</div>
+        </div>
+        <div class="toggle" id="prodToggle"></div>
+      </div>
+      <div class="cv h340"><canvas id="cProj"></canvas></div>
+      <div class="peakcalls" id="peakcalls"></div>
+
+      <div class="projrow">
+        <div class="objbox">
+          <label>Objetivo anual (traducciones)</label>
+          <div class="orow">
+            <input type="number" id="objInput" step="1000">
+            <button class="fbtn" id="btnObjReset">Usar calculado</button>
+          </div>
+          <div class="objhint" id="objHint"></div>
+        </div>
+      </div>
+      <table class="ptab" id="projTable"></table>
+    </div>
+  </section>
+
+  <!-- PROYECCION CALIDAD -->
+  <section>
+    <div class="eyebrow">03b · Calidad esperada</div>
+    <h2>Con más volumen, ¿la calidad aguanta?</h2>
+    <p class="lead">Estimado a partir del perfil estacional histórico de calidad (promedio por mes fiscal, en años completos). No es un modelo predictivo — es la referencia de "si el patrón se repite".</p>
+    <div class="qualproj">
+      <div class="card">
+        <h3>% de issues proyectado · <span id="qualEye1"></span></h3>
+        <div class="h3sub">Estimado por estacionalidad histórica</div>
+        <div class="cv h230"><canvas id="cQualProjIss"></canvas></div>
+      </div>
+      <div class="card">
+        <h3>% de devoluciones proyectado · <span id="qualEye2"></span></h3>
+        <div class="h3sub">Estimado por estacionalidad histórica</div>
+        <div class="cv h230"><canvas id="cQualProjRet"></canvas></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CALIDAD -->
+  <section>
+    <div class="eyebrow">04 · Calidad</div>
+    <h2>La calidad se sostiene, pero conviene vigilar el retorno</h2>
+    <p class="lead">Tasa de <b>issues de contenido</b> y de <b>devoluciones al traductor</b> como % del volumen, mes a mes. Sirve para separar picos de error reales de simple aumento de carga.</p>
+    <div class="card">
+      <h3>Indicadores de calidad en el tiempo</h3>
+      <div class="h3sub">% sobre volumen mensual</div>
+      <div class="cv h280"><canvas id="cQual"></canvas></div>
+    </div>
+  </section>
+
+  <!-- VENDORS -->
+  <section>
+    <div class="eyebrow">05 · Proveedores</div>
+    <h2>Quién produce, con qué calidad</h2>
+    <p class="lead">El volumen se reparte entre tres proveedores principales. La conversación de gestión no es solo volumen: es volumen <b>ponderado por tasa de error</b>.</p>
+    <div class="grid2">
+      <div class="card">
+        <h3>Volumen y calidad por proveedor</h3>
+        <div class="h3sub">Barras: volumen histórico · Puntos: % de issues</div>
+        <div class="cv h280"><canvas id="cVendor"></canvas></div>
+      </div>
+      <div class="card">
+        <h3>Evolución del mix por proveedor</h3>
+        <div class="h3sub">Traducciones por año fiscal</div>
+        <div class="cv h280"><canvas id="cVendorFy"></canvas></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TEMPLATES -->
+  <section>
+    <div class="eyebrow">06 · Plantillas</div>
+    <h2>Dónde se concentra el trabajo</h2>
+    <p class="lead">El volumen no se reparte parejo entre tipos de carta. Concentrar QA y automatización en las plantillas de mayor volumen y mayor tasa de error es el mejor uso del esfuerzo.</p>
+    <div class="card">
+      <h3>Volumen por plantilla</h3>
+      <div class="h3sub" id="tempLegend"></div>
+      <div class="cv h320"><canvas id="cTemp"></canvas></div>
+    </div>
+  </section>
+
+  <!-- TRADUCTORES -->
+  <section>
+    <div class="eyebrow">07 · Equipo de traductores</div>
+    <h2>Carga y calidad por persona</h2>
+    <p class="lead">A la izquierda, los traductores de mayor volumen (balance de carga). A la derecha, el mapa volumen × tasa de error: el cuadrante superior derecho marca a quién dar retroalimentación primero.</p>
+    <div class="grid2">
+      <div class="card">
+        <h3>Top 15 traductores por volumen</h3>
+        <div class="h3sub">Traducciones acumuladas (histórico)</div>
+        <div class="cv h340"><canvas id="cTop"></canvas></div>
+      </div>
+      <div class="card">
+        <h3>Volumen × tasa de issues</h3>
+        <div class="h3sub">Cada punto es un traductor · color = tasa de error</div>
+        <div class="cv h340"><canvas id="cScatter"></canvas></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- INSIGHTS -->
+  <section>
+    <div class="eyebrow">08 · Insights para decisión</div>
+    <h2>Lo que dice la data</h2>
+    <div class="ins">
+      <div class="insight"><span class="tag cap">Capacidad</span><h4>Planifica en modo elástico, no plano</h4><p>La demanda de diciembre casi <b>triplica</b> la de agosto. Mantener un equipo fijo dimensionado al pico deja capacidad ociosa medio año; dimensionado al valle colapsa en Navidad. La palanca es capacidad <b>flexible</b> (proveedor variable o refuerzo estacional) que suba de ~35 a ~85 traductores entre agosto y diciembre.</p></div>
+      <div class="insight"><span class="tag op">Anticipación</span><h4>El pico es predecible con 4–5 meses</h4><p>El patrón se repite todos los años. La contratación o negociación de refuerzo para <b>nov–dic</b> debería cerrarse en <b>julio–agosto</b>. Este dashboard te da la cifra objetivo por mes para esa negociación.</p></div>
+      <div class="insight"><span class="tag q">Calidad</span><h4>Concentra el QA donde duele</h4><p>Las revisiones QA cubren solo una fracción del volumen y se concentran en pocas manos. Enfoca la revisión en las <b>plantillas de alto volumen con &ge;2% de issues</b> y en los traductores del cuadrante crítico, en vez de muestrear parejo.</p></div>
+      <div class="insight"><span class="tag win">Costo</span><h4>Volumen y calidad no van juntos</h4><p>El proveedor de mayor volumen no es el de mejor calidad. Con la tasa de issues y devoluciones por proveedor puedes renegociar SLAs por <b>calidad</b>, no solo por precio o volumen.</p></div>
+    </div>
+
+    <div class="caveat" id="caveatBox">
+      <h4>⚠ Notas de confianza del dato (leer antes de decidir)</h4>
+      <ul id="caveatList"></ul>
+    </div>
+  </section>
+
+  <footer>
+    Vista previa (snapshot) generada sobre 55,598 registros históricos · Los datos están incrustados en este archivo — se comparte por link y abre sin cargar nada.<br>
+    Para un reporte que se refresque solo, el destino natural es Power BI sobre el SharePoint del área.
+  </footer>
+</div>
+
+<script>
+const D = __DATA__;
+const RAW = D.raw, LU = D.lookup, META = D.meta || {};
+const $ = id => document.getElementById(id);
+const fmt = n => Math.round(n).toLocaleString('es-PE');
+const pct = (a,b) => b ? Math.round(a/b*10000)/100 : 0;
+const FYORDER = META.fyorder || ['01.Jul','02.Ago','03.Sep','04.Oct','05.Nov','06.Dic','07.Ene','08.Feb','09.Mar','10.Abr','11.May','12.Jun'];
+const PRODS = META.productividades || [500,560,600];
+const MESES_ABR = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+$('gen').textContent = 'Actualizado ' + (META.actualizado || '');
+$('prodToggle').innerHTML = PRODS.map(p=>`<button data-p="${p}"${p===(META.prod_default||PRODS[Math.floor(PRODS.length/2)])?' class="on"':''}>${p}/mes</button>`).join('');
+
+const C={bg:'#0a1730',blue:'#4fa3f7',blue2:'#7ed0ff',amber:'#f4a93b',red:'#e5595b',green:'#46c79a',mut:'#93a6c9',line:'#26386070',txt:'#eaf0fb'};
+Chart.defaults.color=C.mut; Chart.defaults.font.family="'Inter',sans-serif"; Chart.defaults.font.size=11;
+const grid={color:C.line,drawTicks:false}; const noGrid={display:false};
+const vcol={'WH Vendor':C.blue,'WC Vendor':C.blue2,'HT Vendor':C.green,'--No Vendor--':'#6b7fa8'};
+
+function median(arr){ if(!arr.length) return 0; const s=arr.slice().sort((a,b)=>a-b); const m=s.length>>1; return s.length%2? s[m] : (s[m-1]+s[m])/2; }
+function madOf(arr, med){ return median(arr.map(x=>Math.abs(x-med))) || 1; }
+
+// =====================================================================
+// MOTOR DE CÁLCULO — hace en el navegador lo que antes hacía generar.py/pandas.
+// Recibe una fuente {raw, lookup} (la publicada, o una recién cargada por el
+// usuario) y unos filtros, y devuelve exactamente la misma forma de datos
+// que antes armaba Python: kpi, serie, estacional, anual, proyeccion, etc.
+// =====================================================================
+function calcular(src, filt){
+  const raw = src.raw, lu = src.lookup, n = raw.v.length;
+  const nFechas = lu.fechas.length;
+
+  const fyMonthCount = {};
+  for(let f=0; f<nFechas; f++){ const fy=lu.fy[f]; fyMonthCount[fy]=(fyMonthCount[fy]||0)+1; }
+  const fyList = Object.keys(fyMonthCount).map(Number).sort((a,b)=>a-b);
+  const completos = fyList.filter(fy=>fyMonthCount[fy]===12);
+
+  const fFrom = filt.fyFrom, fTo = filt.fyTo;
+  const fechaIdxVisible = [];
+  for(let f=0; f<nFechas; f++){
+    const fy = lu.fy[f];
+    if(fFrom!=null && fy<fFrom) continue;
+    if(fTo!=null && fy>fTo) continue;
+    fechaIdxVisible.push(f);
+  }
+
+  const mask = new Uint8Array(n);
+  const perFecha = {};
+  fechaIdxVisible.forEach(f=>perFecha[f]={v:0,c:0,r:0,i:0});
+  let tot={v:0,c:0,r:0,i:0};
+  const setTrad=new Set(), setVendor=new Set(), setTemp=new Set(), setFecha=new Set();
+  for(let idx=0; idx<n; idx++){
+    const f = raw.f[idx];
+    if(!(f in perFecha)) continue;
+    if(filt.vendor!=null && raw.ve[idx]!==filt.vendor) continue;
+    if(filt.trad!=null && raw.tr[idx]!==filt.trad) continue;
+    if(filt.temp!=null && raw.te[idx]!==filt.temp) continue;
+    mask[idx]=1;
+    const a=perFecha[f];
+    a.v+=raw.v[idx]; a.c+=raw.c[idx]; a.r+=raw.r[idx]; a.i+=raw.i[idx];
+    tot.v+=raw.v[idx]; tot.c+=raw.c[idx]; tot.r+=raw.r[idx]; tot.i+=raw.i[idx];
+    setTrad.add(raw.tr[idx]); setVendor.add(raw.ve[idx]); setTemp.add(raw.te[idx]); setFecha.add(f);
+  }
+
+  const kpi = { trad: tot.v, checks: tot.c, returns: tot.r, issues: tot.i,
+    cobertura: pct(tot.c,tot.v), tasa_ret: pct(tot.r,tot.v), tasa_iss: pct(tot.i,tot.v),
+    n_trad: setTrad.size, n_vendor: setVendor.size, n_temp: setTemp.size, meses: setFecha.size };
+
+  const serie = { fecha:[], vol:[], tasa_iss:[], tasa_ret:[] };
+  fechaIdxVisible.forEach(f=>{
+    const a=perFecha[f];
+    serie.fecha.push(lu.fechas[f]); serie.vol.push(a.v);
+    serie.tasa_iss.push(pct(a.i,a.v)); serie.tasa_ret.push(pct(a.r,a.v));
+  });
+
+  const byMesfy = {}; FYORDER.forEach(m=>byMesfy[m]={vols:[],iss:[],ret:[]});
+  fechaIdxVisible.forEach(f=>{
+    const fy=lu.fy[f];
+    if(completos.indexOf(fy)===-1) return;
+    if(lu.outlier && lu.outlier[f]) return;
+    const a=perFecha[f];
+    byMesfy[lu.mesfy[f]].vols.push(a.v);
+    if(a.v>0){ byMesfy[lu.mesfy[f]].iss.push(pct(a.i,a.v)); byMesfy[lu.mesfy[f]].ret.push(pct(a.r,a.v)); }
+  });
+  const avg=arr=>arr.length? arr.reduce((a,b)=>a+b,0)/arr.length : 0;
+  const estacional = { mes: FYORDER, vol: FYORDER.map(m=>Math.round(avg(byMesfy[m].vols))) };
+  const calidadProy = { iss: FYORDER.map(m=>Math.round(avg(byMesfy[m].iss)*100)/100), ret: FYORDER.map(m=>Math.round(avg(byMesfy[m].ret)*100)/100) };
+
+  const anualMap = {};
+  fechaIdxVisible.forEach(f=>{ const fy=lu.fy[f]; anualMap[fy]=(anualMap[fy]||0)+perFecha[f].v; });
+  const anualFy = Object.keys(anualMap).map(Number).sort((a,b)=>a-b);
+  const anual = { fy: anualFy.map(y=>'FY'+y), vol: anualFy.map(y=>anualMap[y]), completo: anualFy.map(y=>completos.indexOf(y)!==-1) };
+
+  const incompletos = fyList.filter(y=>completos.indexOf(y)===-1);
+  const projFy = incompletos.length ? Math.max(...incompletos) : (fyList.length? Math.max(...fyList)+1 : new Date().getFullYear()+1);
+
+  const completosEnRango = anualFy.filter(y=>completos.indexOf(y)!==-1);
+  let objCalc = completosEnRango.length
+    ? completosEnRango.reduce((s,y)=>s+anualMap[y],0)/completosEnRango.length
+    : (anualFy.length? anualFy.reduce((s,y)=>s+anualMap[y],0)/anualFy.length : 0);
+  if(META.volumen_anual_obj) objCalc = META.volumen_anual_obj;
+  objCalc = Math.round(objCalc * (1 + (META.crecimiento||0)));
+  const obj = (filt.objOverride!=null && !isNaN(filt.objOverride)) ? filt.objOverride : objCalc;
+
+  const seasSum = estacional.vol.reduce((a,b)=>a+b,0) || 1;
+  const peso = estacional.vol.map(v=>v/seasSum);
+  let proj = peso.map(p=>Math.round(p*obj));
+
+  let realHasta=null; const realesPorMes={};
+  fechaIdxVisible.forEach(f=>{ if(lu.fy[f]===projFy) realesPorMes[lu.mesfy[f]] = perFecha[f].v; });
+  FYORDER.forEach((m,i)=>{ if(m in realesPorMes){ proj[i]=realesPorMes[m]; realHasta=m; } });
+
+  const proyeccion = { mes: FYORDER, vol: proj, real_hasta: realHasta, fy: 'FY'+projFy,
+    objetivo: obj, objetivo_calc: objCalc, calidad: calidadProy };
+  PRODS.forEach(p=> proyeccion['trad_'+p] = proj.map(v=>Math.round(v/p*10)/10));
+
+  function groupBy(keyArr){
+    const m = new Map();
+    for(let idx=0; idx<n; idx++){
+      if(!mask[idx]) continue;
+      const k = keyArr[idx]; let e = m.get(k);
+      if(!e){ e={v:0,c:0,r:0,i:0}; m.set(k,e); }
+      e.v+=raw.v[idx]; e.c+=raw.c[idx]; e.r+=raw.r[idx]; e.i+=raw.i[idx];
+    }
+    return m;
+  }
+
+  const vendorMap = groupBy(raw.ve);
+  const vendorSorted = [...vendorMap.entries()].sort((a,b)=>b[1].v-a[1].v);
+  const vendor = { nombre: vendorSorted.map(([k])=>lu.vendors[k]), vol: vendorSorted.map(([,e])=>e.v),
+    tasa_iss: vendorSorted.map(([,e])=>pct(e.i,e.v)), tasa_ret: vendorSorted.map(([,e])=>pct(e.r,e.v)),
+    cobertura: vendorSorted.map(([,e])=>pct(e.c,e.v)) };
+
+  const vendorFyMap = new Map();
+  for(let idx=0; idx<n; idx++){
+    if(!mask[idx]) continue;
+    const fy=lu.fy[raw.f[idx]];
+    let mm=vendorFyMap.get(fy); if(!mm){ mm=new Map(); vendorFyMap.set(fy,mm); }
+    mm.set(raw.ve[idx], (mm.get(raw.ve[idx])||0)+raw.v[idx]);
+  }
+  const vendorFyList = [...vendorFyMap.keys()].sort((a,b)=>a-b);
+  const vendor_fy = { fy: vendorFyList.map(y=>'FY'+y), series:{} };
+  vendorSorted.forEach(([vi])=>{ vendor_fy.series[lu.vendors[vi]] = vendorFyList.map(y=>(vendorFyMap.get(y)||new Map()).get(vi)||0); });
+
+  const tempMap = groupBy(raw.te);
+  const tempSorted = [...tempMap.entries()].sort((a,b)=>b[1].v-a[1].v);
+  const template = { nombre: tempSorted.map(([k])=>lu.templates[k]), vol: tempSorted.map(([,e])=>e.v),
+    tasa_iss: tempSorted.map(([,e])=>pct(e.i,e.v)) };
+
+  const tradMap = groupBy(raw.tr);
+  const tradEntries = [...tradMap.entries()].filter(([,e])=>e.v>=500).sort((a,b)=>b[1].v-a[1].v);
+  const top = tradEntries.slice(0,15);
+  const top_trad = { nombre: top.map(([k])=>lu.traductores[k]), vol: top.map(([,e])=>e.v),
+    tasa_iss: top.map(([,e])=>pct(e.i,e.v)) };
+  const scatter = tradEntries.map(([k,e])=>({ n:lu.traductores[k], x:e.v, y:pct(e.i,e.v) }));
+
+  return { kpi, serie, estacional, anual, proyeccion, vendor, vendor_fy, template, top_trad, scatter,
+    meta: { rango: fechaIdxVisible.length? lu.fechas[fechaIdxVisible[0]]+' → '+lu.fechas[fechaIdxVisible[fechaIdxVisible.length-1]] : '',
+      fy_min: fyList.length?'FY'+Math.min(...fyList):'', fy_max: fyList.length?'FY'+Math.max(...fyList):'' } };
+}
+
+// =====================================================================
+// CARGA DE EXCEL/CSV — réplica en JS de cargar()+validar() de generar.py,
+// para poder previsualizar un archivo nuevo sin tocar Python ni git.
+// =====================================================================
+function procesarFilas(rows){
+  const req = ['VENDOR','TRANSLATOR NAME','TEMPLATE','TRANSLATION COUNT','TRANSLATION CHECKS PERFORMED',
+               'RETURNED TO TRANSLATOR','CONTENT ISSUES CONFIRMED','MesNum','MesFY','AñoFY'];
+  if(!rows.length) throw new Error('El archivo no tiene filas de datos.');
+  const cols = Object.keys(rows[0]);
+  const faltan = req.filter(c=>cols.indexOf(c)===-1);
+  if(faltan.length) throw new Error('Faltan columnas: '+faltan.join(', '));
+
+  const dec = rows.map(r=>{
+    const mesNum = Number(r['MesNum']), anoFY = Number(r['AñoFY']);
+    const y = mesNum>=7 ? anoFY-1 : anoFY;
+    return Object.assign({}, r, { _key:y*12+(mesNum-1), _label: MESES_ABR[mesNum-1]+' '+String(y).slice(-2) });
+  });
+
+  const alertas = [];
+  const porFecha = new Map();
+  dec.forEach(r=>{
+    let e = porFecha.get(r._key); if(!e){ e={vol:0,label:r._label,translators:new Set()}; porFecha.set(r._key,e); }
+    const v = Number(r['TRANSLATION COUNT'])||0;
+    e.vol += v; if(v>0) e.translators.add(r['TRANSLATOR NAME']);
+  });
+  const keysSorted = [...porFecha.keys()].sort((a,b)=>a-b);
+  const vols = keysSorted.map(k=>porFecha.get(k).vol);
+  const med = median(vols), md = madOf(vols, med);
+  const outlierKeys = new Set();
+  keysSorted.forEach((k,idx)=>{
+    if(Math.abs(vols[idx]-med)/(1.4826*md) > 3.5){
+      outlierKeys.add(k);
+      alertas.push(`Volumen atípico en ${porFecha.get(k).label}: ${fmt(vols[idx])} (mediana ~${fmt(med)}). Excluido del perfil estacional.`);
+    }
+  });
+  const kmin=keysSorted[0], kmax=keysSorted[keysSorted.length-1];
+  const faltanMeses=[];
+  for(let k=kmin;k<=kmax;k++){ if(!porFecha.has(k)){ faltanMeses.push(MESES_ABR[((k%12)+12)%12]+' '+Math.floor(k/12)); } }
+  if(faltanMeses.length) alertas.push('Meses sin datos en el rango: '+faltanMeses.join(', ')+'.');
+  const actCounts = keysSorted.map(k=>porFecha.get(k).translators.size);
+  const base = median(actCounts.slice(0, Math.floor(actCounts.length/2)));
+  const medRec = median(actCounts.slice(-3));
+  if(base && medRec < base*0.6){
+    alertas.push(`La cuenta de traductores activos cae de ~${Math.round(base)} a ~${Math.round(medRec)} en meses recientes: probable cambio de registro, no mejora real de productividad. La proyección usa una productividad estable (${META.prod_default||560}/mes), no la reciente.`);
+  }
+  let inc=0;
+  dec.forEach(r=>{ if((Number(r['CONTENT ISSUES CONFIRMED'])||0)>0 && (Number(r['TRANSLATION CHECKS PERFORMED'])||0)===0) inc++; });
+  if(inc) alertas.push(`${fmt(inc)} filas tienen issues confirmados con 0 revisiones: las columnas de revisión, issues y devolución se registran a distinto nivel (revisor vs. traductor). Los ratios son válidos en agregado, no fila por fila.`);
+
+  const vendors=[...new Set(dec.map(r=>r['VENDOR']))].sort();
+  const trads=[...new Set(dec.map(r=>r['TRANSLATOR NAME']))].sort();
+  const temps=[...new Set(dec.map(r=>r['TEMPLATE']))].sort();
+  const vIdx=new Map(vendors.map((x,i)=>[x,i])), tIdx=new Map(trads.map((x,i)=>[x,i])), pIdx=new Map(temps.map((x,i)=>[x,i]));
+  const fechaKeys=keysSorted;
+  const fIdx=new Map(fechaKeys.map((k,i)=>[k,i]));
+  const fyPorKey=new Map(), mesfyPorKey=new Map(), labelPorKey=new Map();
+  dec.forEach(r=>{ fyPorKey.set(r._key, Number(r['AñoFY'])); mesfyPorKey.set(r._key, r['MesFY']); labelPorKey.set(r._key, r._label); });
+
+  const grupos = new Map();
+  dec.forEach(r=>{
+    const gkey = fIdx.get(r._key)+'|'+vIdx.get(r['VENDOR'])+'|'+tIdx.get(r['TRANSLATOR NAME'])+'|'+pIdx.get(r['TEMPLATE']);
+    let e=grupos.get(gkey);
+    if(!e){ e={f:fIdx.get(r._key), ve:vIdx.get(r['VENDOR']), tr:tIdx.get(r['TRANSLATOR NAME']), te:pIdx.get(r['TEMPLATE']), v:0,c:0,r:0,i:0}; grupos.set(gkey,e); }
+    e.v += Number(r['TRANSLATION COUNT'])||0; e.c += Number(r['TRANSLATION CHECKS PERFORMED'])||0;
+    e.r += Number(r['RETURNED TO TRANSLATOR'])||0; e.i += Number(r['CONTENT ISSUES CONFIRMED'])||0;
+  });
+  const gArr=[...grupos.values()];
+  const raw = { f:gArr.map(e=>e.f), ve:gArr.map(e=>e.ve), tr:gArr.map(e=>e.tr), te:gArr.map(e=>e.te),
+                v:gArr.map(e=>e.v), c:gArr.map(e=>e.c), r:gArr.map(e=>e.r), i:gArr.map(e=>e.i) };
+  const lookup = { vendors, traductores:trads, templates:temps,
+    fechas: fechaKeys.map(k=>labelPorKey.get(k)), fy: fechaKeys.map(k=>fyPorKey.get(k)),
+    mesfy: fechaKeys.map(k=>mesfyPorKey.get(k)), outlier: fechaKeys.map(k=>outlierKeys.has(k)) };
+  return { src: {raw, lookup}, alertas };
+}
+
+// =====================================================================
+// ESTADO + RENDER
+// =====================================================================
+let SRC = { raw: RAW, lookup: LU, alertas: D.alertas || [] };
+let FILT = { fyFrom:null, fyTo:null, vendor:null, trad:null, temp:null };
+let objOverride = null;
+let prod = META.prod_default || PRODS[Math.floor(PRODS.length/2)];
+let lastD2 = null;
+let charts = {};
+function destroyChart(id){ if(charts[id]){ charts[id].destroy(); charts[id]=null; } }
+
+function populateFilterOptions(lu){
+  const fys=[...new Set(lu.fy)].sort((a,b)=>a-b);
+  $('fFyFrom').innerHTML = fys.map(y=>`<option value="${y}">FY${y}</option>`).join('');
+  $('fFyTo').innerHTML = fys.map(y=>`<option value="${y}">FY${y}</option>`).join('');
+  $('fFyFrom').value = fys[0]; $('fFyTo').value = fys[fys.length-1];
+  const mkOpt=(arr)=>'<option value="">Todos</option>'+arr.map((n,i)=>`<option value="${i}">${n}</option>`).join('');
+  $('fVendor').innerHTML = mkOpt(lu.vendors); $('fVendor').value='';
+  $('fTemp').innerHTML = mkOpt(lu.templates); $('fTemp').value='';
+  $('fTrad').innerHTML = mkOpt(lu.traductores); $('fTrad').value='';
+  FILT = { fyFrom: fys[0], fyTo: fys[fys.length-1], vendor:null, trad:null, temp:null };
+}
+
+function updateActiveFiltersText(lu){
+  const parts=[]; const fys=[...new Set(lu.fy)].sort((a,b)=>a-b);
+  if(FILT.fyFrom!==fys[0] || FILT.fyTo!==fys[fys.length-1]) parts.push(`FY${FILT.fyFrom}–FY${FILT.fyTo}`);
+  if(FILT.vendor!=null) parts.push('Proveedor: '+lu.vendors[FILT.vendor]);
+  if(FILT.trad!=null) parts.push('Traductor: '+lu.traductores[FILT.trad]);
+  if(FILT.temp!=null) parts.push('Plantilla: '+lu.templates[FILT.temp]);
+  $('activeFilters').textContent = parts.length? 'Filtrando: '+parts.join(' · ') : '';
+}
+
+function computeAndRender(){
+  const D2 = calcular(SRC, Object.assign({}, FILT, {objOverride}));
+  lastD2 = D2;
+  renderAll(D2);
+  updateActiveFiltersText(SRC.lookup);
+}
+
+function renderProjTable(D2){
+  const realIdx = D2.proyeccion.mes.indexOf(D2.proyeccion.real_hasta);
+  let html = '<thead><tr><th>Mes</th><th>Volumen</th>'+PRODS.map(p=>`<th>${p}/mes</th>`).join('')+'</tr></thead><tbody>';
+  D2.proyeccion.mes.forEach((m,i)=>{
+    const isReal = realIdx>=0 && i<=realIdx;
+    html += `<tr class="${isReal?'realrow':''}"><td>${m}</td><td class="${isReal?'real':'fc'}">${fmt(D2.proyeccion.vol[i])}</td>`;
+    PRODS.forEach(p=> html += `<td>${D2.proyeccion['trad_'+p][i]}</td>`);
+    html += '</tr>';
+  });
+  $('projTable').innerHTML = html+'</tbody>';
+}
+
+function renderAll(D2){
+  $('stampRange').innerHTML = 'Histórico <b>'+(D2.meta.fy_min||'')+' – '+(D2.meta.fy_max||'')+'</b>';
+  $('stampMeses').textContent = (D2.kpi.meses||'')+' meses · proyección '+(D2.proyeccion.fy||'');
+  $('trendRange').textContent = D2.meta.rango || '';
+  $('projEye').textContent = D2.proyeccion.fy || '';
+  $('projTitle').textContent = D2.proyeccion.fy || '';
+  $('qualEye1').textContent = D2.proyeccion.fy || '';
+  $('qualEye2').textContent = D2.proyeccion.fy || '';
+  const UMB=META.umbral_issues||2;
+  $('tempLegend').textContent='Naranja = tasa de issues ≥ '+UMB+'%';
+  $('caveatList').innerHTML = (SRC.alertas&&SRC.alertas.length)
+   ? SRC.alertas.map(a=>`<li>${a}</li>`).join('') : '<li>Sin alertas de calidad detectadas en esta base.</li>';
+  $('objInput').value = D2.proyeccion.objetivo;
+  $('objHint').textContent = objOverride!=null
+    ? 'Calculado automáticamente: '+fmt(D2.proyeccion.objetivo_calc)
+    : 'Calculado automáticamente a partir de años fiscales completos'+(META.crecimiento?` (+${Math.round(META.crecimiento*100)}% crecimiento)`:'')+'.';
+
+  const k=D2.kpi;
+  const cards=[['blue',fmt(k.trad),'Traducciones'],['blue',fmt(k.checks),'Revisiones QA'],
+   ['r',fmt(k.issues),'Issues de contenido'],['a',fmt(k.returns),'Devueltas'],
+   ['g',k.cobertura+'%','Cobertura QA'],['a',k.tasa_iss+'%','Tasa de issues']];
+  $('kstrip').innerHTML=cards.map(c=>`<div class="kpi ${c[0]}"><div class="num">${c[1]}</div><div class="lbl">${c[2]}</div></div>`).join('');
+
+  destroyChart('trend');
+  charts.trend = new Chart(cTrend,{type:'line',data:{labels:D2.serie.fecha,datasets:[{
+    data:D2.serie.vol,borderColor:C.blue,borderWidth:2,tension:.35,pointRadius:2,pointHoverRadius:5,
+    pointBackgroundColor:D2.serie.vol.map((v,i)=>{const m=D2.serie.fecha[i];return(m.startsWith('Nov')||m.startsWith('Dec'))?C.amber:C.blue}),
+    fill:true,backgroundColor:(ctx)=>{const g=ctx.chart.ctx.createLinearGradient(0,0,0,300);g.addColorStop(0,'#4fa3f733');g.addColorStop(1,'#4fa3f700');return g}
+  }]},options:{maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>fmt(c.raw)+' traducciones'}}},
+    scales:{x:{grid:noGrid,ticks:{maxTicksLimit:14,autoSkip:true}},y:{grid:grid,ticks:{callback:v=>v/1000+'k'}}}}});
+
+  destroyChart('season');
+  charts.season = new Chart(cSeason,{type:'bar',data:{labels:D2.estacional.mes,datasets:[{data:D2.estacional.vol,
+    backgroundColor:D2.estacional.vol.map(v=>v>36000?C.amber:'#3a6fc4'),borderRadius:5}]},
+    options:{maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>fmt(c.raw)}}},
+    scales:{x:{grid:noGrid},y:{grid:grid,ticks:{callback:v=>v/1000+'k'}}}}});
+
+  destroyChart('annual');
+  charts.annual = new Chart(cAnnual,{type:'bar',data:{labels:D2.anual.fy,datasets:[{data:D2.anual.vol,
+    backgroundColor:D2.anual.vol.map((v,i)=>i===D2.anual.vol.length-1?'#2a4a7a':C.blue),borderRadius:5}]},
+    options:{maintainAspectRatio:false,plugins:{legend:{display:false},
+     tooltip:{callbacks:{label:c=>fmt(c.raw)+(c.dataIndex===D2.anual.vol.length-1?' (parcial)':'')}}},
+    scales:{x:{grid:noGrid},y:{grid:grid,ticks:{callback:v=>v/1000+'k'}}}}});
+
+  const need=D2.proyeccion['trad_'+prod];
+  const realIdx=D2.proyeccion.mes.indexOf(D2.proyeccion.real_hasta);
+  destroyChart('proj');
+  charts.proj = new Chart(cProj,{data:{labels:D2.proyeccion.mes,datasets:[
+    {type:'bar',label:'Volumen proyectado',data:D2.proyeccion.vol,yAxisID:'y',borderRadius:5,
+     backgroundColor:D2.proyeccion.vol.map((v,i)=>i<=realIdx?C.green:'#3a6fc4')},
+    {type:'line',label:'Traductores necesarios',data:need,yAxisID:'y1',borderColor:C.amber,
+     borderWidth:3,tension:.35,pointRadius:4,pointBackgroundColor:C.amber,pointBorderColor:C.bg}
+   ]},options:{maintainAspectRatio:false,plugins:{legend:{labels:{usePointStyle:true,boxWidth:8},position:'top',align:'end'},
+     tooltip:{callbacks:{label:c=>c.dataset.yAxisID==='y1'?'~'+c.raw+' traductores':fmt(c.raw)+' traducciones'}}},
+    scales:{x:{grid:noGrid},
+     y:{position:'left',grid:grid,ticks:{callback:v=>v/1000+'k'},title:{display:true,text:'Traducciones',color:C.mut}},
+     y1:{position:'right',grid:noGrid,min:0,suggestedMax:100,title:{display:true,text:'Traductores',color:C.amber}}}}});
+  const vals=need.slice(); const peak=Math.max(...vals); const peakM=D2.proyeccion.mes[vals.indexOf(peak)];
+  const noJul=vals.map((v,i)=>i===realIdx?999:v); const low=Math.min(...noJul); const lowM=D2.proyeccion.mes[noJul.indexOf(low)];
+  const avgN=(vals.reduce((a,b)=>a+b,0)/vals.length);
+  $('peakcalls').innerHTML=`
+   <div class="pc peak"><div class="t">Pico — ${peakM}</div><div class="v">~${Math.round(peak)} traductores</div><div class="d">mes de mayor demanda</div></div>
+   <div class="pc low"><div class="t">Valle — ${lowM}</div><div class="v">~${Math.round(low)} traductores</div><div class="d">mes de menor demanda</div></div>
+   <div class="pc avg"><div class="t">Promedio del año</div><div class="v">~${avgN.toFixed(0)} traductores</div><div class="d">a ${prod} traducciones/mes por persona</div></div>`;
+  renderProjTable(D2);
+
+  destroyChart('qualProjIss');
+  charts.qualProjIss = new Chart(cQualProjIss,{type:'bar',data:{labels:D2.proyeccion.mes,datasets:[
+    {data:D2.proyeccion.calidad.iss,backgroundColor:C.amber+'cc',borderRadius:5}]},
+    options:{maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'~'+c.raw+'% issues (estimado)'}}},
+    scales:{x:{grid:noGrid},y:{grid:grid,ticks:{callback:v=>v+'%'}}}}});
+  destroyChart('qualProjRet');
+  charts.qualProjRet = new Chart(cQualProjRet,{type:'bar',data:{labels:D2.proyeccion.mes,datasets:[
+    {data:D2.proyeccion.calidad.ret,backgroundColor:C.blue2+'cc',borderRadius:5}]},
+    options:{maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'~'+c.raw+'% devoluciones (estimado)'}}},
+    scales:{x:{grid:noGrid},y:{grid:grid,ticks:{callback:v=>v+'%'}}}}});
+
+  destroyChart('qual');
+  charts.qual = new Chart(cQual,{type:'line',data:{labels:D2.serie.fecha,datasets:[
+   {label:'% Issues',data:D2.serie.tasa_iss,borderColor:C.red,borderWidth:2,tension:.3,pointRadius:0,pointHoverRadius:4},
+   {label:'% Retorno',data:D2.serie.tasa_ret,borderColor:C.amber,borderWidth:2,tension:.3,pointRadius:0,pointHoverRadius:4,borderDash:[5,4]}
+  ]},options:{maintainAspectRatio:false,plugins:{legend:{labels:{usePointStyle:true,boxWidth:8},align:'end'},
+    tooltip:{callbacks:{label:c=>c.dataset.label+': '+c.raw+'%'}}},
+   scales:{x:{grid:noGrid,ticks:{maxTicksLimit:12}},y:{grid:grid,ticks:{callback:v=>v+'%'}}}}});
+
+  destroyChart('vendor');
+  charts.vendor = new Chart(cVendor,{data:{labels:D2.vendor.nombre,datasets:[
+   {type:'bar',label:'Volumen',data:D2.vendor.vol,yAxisID:'y',backgroundColor:C.blue,borderRadius:5},
+   {type:'line',label:'% Issues',data:D2.vendor.tasa_iss,yAxisID:'y1',borderColor:C.amber,borderWidth:3,pointRadius:5,pointBackgroundColor:C.amber,tension:.3}
+  ]},options:{maintainAspectRatio:false,plugins:{legend:{labels:{usePointStyle:true,boxWidth:8},align:'end'},
+    tooltip:{callbacks:{label:c=>c.dataset.yAxisID==='y1'?c.raw+'% issues':fmt(c.raw)}}},
+   scales:{x:{grid:noGrid},y:{grid:grid,ticks:{callback:v=>v/1000+'k'}},y1:{position:'right',grid:noGrid,min:0,ticks:{callback:v=>v+'%'}}}}});
+
+  destroyChart('vendorFy');
+  charts.vendorFy = new Chart(cVendorFy,{type:'bar',data:{labels:D2.vendor_fy.fy,datasets:Object.keys(D2.vendor_fy.series).map(k=>({
+    label:k,data:D2.vendor_fy.series[k],backgroundColor:vcol[k]||C.mut,borderRadius:3,stack:'s'}))},
+   options:{maintainAspectRatio:false,plugins:{legend:{labels:{usePointStyle:true,boxWidth:8},align:'end'},
+    tooltip:{callbacks:{label:c=>c.dataset.label+': '+fmt(c.raw)}}},
+   scales:{x:{grid:noGrid,stacked:true},y:{grid:grid,stacked:true,ticks:{callback:v=>v/1000+'k'}}}}});
+
+  destroyChart('temp');
+  charts.temp = new Chart(cTemp,{type:'bar',data:{labels:D2.template.nombre,datasets:[{data:D2.template.vol,
+    backgroundColor:D2.template.tasa_iss.map(t=>t>=UMB?C.amber:C.blue),borderRadius:5}]},
+   options:{maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false},
+    tooltip:{callbacks:{label:c=>fmt(c.raw)+' · '+D2.template.tasa_iss[c.dataIndex]+'% issues'}}},
+   scales:{x:{grid:grid,ticks:{callback:v=>v/1000+'k'}},y:{grid:noGrid}}}});
+
+  destroyChart('top');
+  charts.top = new Chart(cTop,{type:'bar',data:{labels:D2.top_trad.nombre,datasets:[{data:D2.top_trad.vol,
+    backgroundColor:C.blue2,borderRadius:4}]},
+   options:{maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false},
+    tooltip:{callbacks:{label:c=>fmt(c.raw)+' · '+D2.top_trad.tasa_iss[c.dataIndex]+'% issues'}}},
+   scales:{x:{grid:grid,ticks:{callback:v=>v/1000+'k'}},y:{grid:noGrid,ticks:{font:{size:10}}}}}});
+
+  destroyChart('scatter');
+  charts.scatter = new Chart(cScatter,{type:'scatter',data:{datasets:[{
+    data:D2.scatter.map(p=>({x:p.x,y:p.y,n:p.n})),
+    backgroundColor:D2.scatter.map(p=>p.y>=3?'#e5595bcc':p.y>=1.5?'#f4a93bcc':'#4fa3f7aa'),
+    pointRadius:D2.scatter.map(p=>Math.max(4,Math.sqrt(p.x)/12)),pointHoverRadius:9,
+    borderColor:'#7ed0ff55',borderWidth:1}]},
+   options:{maintainAspectRatio:false,plugins:{legend:{display:false},
+    tooltip:{callbacks:{label:c=>c.raw.n+': '+fmt(c.raw.x)+' trad · '+c.raw.y+'% issues'}}},
+   scales:{x:{grid:grid,title:{display:true,text:'Volumen →',color:C.mut},ticks:{callback:v=>v/1000+'k'}},
+     y:{grid:grid,title:{display:true,text:'% Issues →',color:C.mut},ticks:{callback:v=>v+'%'}}}}});
+}
+
+// =====================================================================
+// WIRING — filtros, objetivo ajustable, toggle de productividad, carga de Excel
+// =====================================================================
+document.querySelectorAll('#prodToggle button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('#prodToggle button').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on'); prod=+b.dataset.p; renderAll(lastD2); updateActiveFiltersText(SRC.lookup);
+});
+
+['fFyFrom','fFyTo','fVendor','fTrad','fTemp'].forEach(id=>{
+  $(id).addEventListener('change', ()=>{
+    FILT.fyFrom = Number($('fFyFrom').value);
+    FILT.fyTo = Number($('fFyTo').value);
+    FILT.vendor = $('fVendor').value===''? null : Number($('fVendor').value);
+    FILT.trad = $('fTrad').value===''? null : Number($('fTrad').value);
+    FILT.temp = $('fTemp').value===''? null : Number($('fTemp').value);
+    computeAndRender();
+  });
+});
+$('btnClearFilters').addEventListener('click', ()=>{ populateFilterOptions(SRC.lookup); computeAndRender(); });
+
+$('objInput').addEventListener('change', ()=>{
+  const v = $('objInput').value;
+  objOverride = v===''? null : Number(v);
+  computeAndRender();
+});
+$('btnObjReset').addEventListener('click', ()=>{ objOverride=null; computeAndRender(); });
+
+$('fileUpload').addEventListener('change', async (e)=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  $('fileStatus').className=''; $('fileStatus').textContent='Leyendo '+file.name+'…';
+  try{
+    const esCsv = /\.csv$/i.test(file.name);
+    // Los .csv se leen como texto (decodificación UTF-8 correcta del navegador);
+    // SheetJS interpretaba mal acentos/ñ (ej. "AñoFY") al leerlos como bytes crudos.
+    const wb = esCsv
+      ? XLSX.read(await file.text(), {type:'string'})
+      : XLSX.read(await file.arrayBuffer(), {type:'array'});
+    const sheet = wb.Sheets[wb.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(sheet, {defval:null});
+    const {src, alertas} = procesarFilas(rows);
+    SRC = { raw: src.raw, lookup: src.lookup, alertas };
+    objOverride = null; prod = META.prod_default || PRODS[Math.floor(PRODS.length/2)];
+    document.querySelectorAll('#prodToggle button').forEach(x=>x.classList.toggle('on', +x.dataset.p===prod));
+    populateFilterOptions(SRC.lookup);
+    computeAndRender();
+    $('previewFile').textContent = file.name;
+    $('previewBar').classList.add('on');
+    $('fileStatus').className='ok'; $('fileStatus').textContent='✓ '+rows.length.toLocaleString('es-PE')+' filas cargadas';
+  }catch(err){
+    console.error(err);
+    $('fileStatus').className='err'; $('fileStatus').textContent='✗ '+err.message;
+  }
+});
+
+$('btnBackToPublished').addEventListener('click', ()=>{
+  SRC = { raw: RAW, lookup: LU, alertas: D.alertas || [] };
+  objOverride = null; prod = META.prod_default || PRODS[Math.floor(PRODS.length/2)];
+  document.querySelectorAll('#prodToggle button').forEach(x=>x.classList.toggle('on', +x.dataset.p===prod));
+  populateFilterOptions(SRC.lookup);
+  computeAndRender();
+  $('fileUpload').value = '';
+  $('fileStatus').className=''; $('fileStatus').textContent='';
+  $('previewBar').classList.remove('on');
+});
+
+// ---- arranque ----
+populateFilterOptions(SRC.lookup);
+computeAndRender();
+</script>
+</body>
+</html>

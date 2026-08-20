@@ -1,0 +1,41 @@
+name: Generar y publicar dashboard
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      # No se corre generar.py aquí: el CSV fuente nunca se sube a git (ver .gitignore),
+      # así que salida/index.html se genera EN TU MÁQUINA (paso 2 del refresco mensual,
+      # ver README) y se commitea ya generado. Este job solo publica lo que ya está en salida/.
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Preparar artefacto de Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: salida
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Publicar en GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json.schemas.azureedge.net/static-web-apps/1.0.0/staticwebapp.config.json",
+  "globalHeaders": {
+    "Content-Security-Policy": "frame-ancestors 'self' https://TU-TENANT.sharepoint.com;",
+    "X-Content-Type-Options": "nosniff",
+    "Referrer-Policy": "no-referrer"
+  },
+  "navigationFallback": {
+    "rewrite": "/index.html"
+  },
+  "responseOverrides": {
+    "404": { "rewrite": "/index.html" }
+  }
+}
