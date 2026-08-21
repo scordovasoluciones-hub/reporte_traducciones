@@ -7,7 +7,10 @@ Engagement Site de SharePoint.
 ## Estructura
 
     datos/            <- coloca aquí el CSV histórico (el script toma el más reciente)
-    generar.py        <- lee el CSV, valida calidad de dato, exporta los datos GRANULARES
+                         y datos/presupuesto.xlsx con la hoja "PagoTraducciones" (opcional:
+                         si no está, se omite la pestaña Presupuesto)
+    generar.py        <- lee el CSV y el Excel de presupuesto, valida calidad de dato,
+                         exporta los datos GRANULARES de ambas fuentes
     plantilla.html    <- plantilla del dashboard (token __DATA__ + motor de cálculo en JS)
     salida/           <- generado: index.html (lo que se despliega) + datos.json
     staticwebapp.config.json  <- headers de Azure (sin usar mientras se hospede en GitHub Pages;
@@ -22,18 +25,30 @@ los filtros y la vista previa de un Excel nuevo cargado en el navegador.
 
 ## Funciones del dashboard
 
-- **Filtros** (arriba del todo): rango de año fiscal, proveedor, traductor y plantilla.
-  Se pueden combinar; todas las gráficas y KPIs se recalculan al vuelo.
-- **Proyección FY**: gráfica + tabla numérica mes a mes, con 3 escenarios de productividad
-  (500/560/600 trad/mes) y un campo para simular un objetivo anual distinto sin tocar código.
+- **Pestañas**: "Reporte de Traducciones" (histórico + proyección) y "Presupuesto" (budget,
+  pagos y licencias) — mismo link, se cambia con los botones de arriba a la derecha.
+- **Panel de indicadores y filtros plegable**: el botón "Plegar/Desplegar" oculta los KPIs y
+  filtros para dar más espacio a las gráficas, sobre todo en pantallas anchas/horizontales.
+- **Filtros del Reporte** (arriba, plegable): rango de año fiscal, mes fiscal, proveedor,
+  traductor y plantilla. Se pueden combinar; todas las gráficas y KPIs se recalculan al vuelo.
+  El filtro de mes aplica a todo, incluida "Traductores por volumen", que muestra a **todos**
+  los traductores del periodo filtrado (no solo los top) para detectar caídas puntuales de
+  productividad en un mes específico.
+- **Proyección FY**: gráfica + tabla numérica mes a mes, con 5 escenarios de productividad
+  (1000/1500/2000/2500/3000 trad/mes) y un campo para simular un objetivo anual distinto sin
+  tocar código.
 - **Calidad esperada**: estimado de % de issues y % de devoluciones para el próximo FY,
   basado en el perfil estacional histórico de calidad (no es un modelo predictivo).
-- **Cargar Excel/CSV** (vista previa): botón junto a los filtros para revisar cómo se vería
-  el dashboard con un mes nuevo, sin publicar nada — solo se ve en tu navegador.
+- **Pestaña Presupuesto**: KPIs (budget, pago ejecutado, % ejecución, cartas traducidas, costo
+  promedio por carta, costo de licencias), budget vs. pago real por mes, costo por carta en el
+  tiempo, pago por Tipo Traductor por año fiscal, y licencias (cantidad y costo). Filtros propios
+  de FY y Tipo Traductor. Fuente independiente del reporte de traducciones (no se cruzan).
+- **Cargar Excel/CSV** (vista previa, en cada pestaña): botón junto a los filtros para revisar
+  cómo se vería el dashboard con datos nuevos, sin publicar nada — solo se ve en tu navegador.
 
 ## Refresco mensual — publicar para todos (3 pasos)
 
-    1. Reemplaza el CSV en datos/ por la base actualizada.
+    1. Reemplaza el CSV en datos/ (y datos/presupuesto.xlsx si también cambió) por la base actualizada.
     2. python generar.py
     3. git add -A && git commit -m "Actualiza datos a <mes>" && git push
 
@@ -48,7 +63,8 @@ calcula las mismas alertas para el archivo que subas.
 ## Supuestos configurables
 
 Al inicio de `generar.py`:
-- `PRODUCTIVIDADES` / `PROD_DEFAULT` — traducciones por traductor/mes (escenarios del selector).
+- `PRODUCTIVIDADES` / `PROD_DEFAULT` — traducciones por traductor/mes (escenarios del selector;
+  hoy 1000/1500/2000/2500/3000, por defecto 2000).
 - `VOLUMEN_ANUAL_OBJ` / `CRECIMIENTO` — objetivo anual de la proyección (el usuario puede
   además ajustarlo temporalmente desde la propia página, sin tocar el script).
 - `UMBRAL_ISSUES_ALTA` — % que marca una plantilla como crítica.

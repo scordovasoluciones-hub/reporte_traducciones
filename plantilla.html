@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Reporte de Traducciones · Engagement — Compassion Perú</title>
+<title>Traducciones · Engagement — Compassion Perú</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -140,6 +140,26 @@ table.ptab td.fc{color:var(--blue2)}
 table.ptab tr.realrow td{background:#46c79a12}
 .qualproj{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
 
+/* ---- tabs (Reporte / Presupuesto) ---- */
+.tabnav{display:flex;gap:6px;background:#0c1c3c;border:1px solid var(--line);border-radius:11px;padding:4px;margin-left:8px}
+.tabnav button{background:none;border:0;color:var(--mut);font-family:'Space Grotesk';font-size:12.5px;font-weight:600;
+  padding:8px 15px;border-radius:8px;cursor:pointer;transition:.15s}
+.tabnav button.on{background:var(--blue);color:#06152e}
+
+/* ---- panel colapsable (kpis + filtros) ---- */
+.panelhead{display:flex;align-items:center;justify-content:space-between;margin-top:16px;cursor:pointer;user-select:none}
+.panelhead .lbl2{font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.5px;font-weight:600}
+.collapsebtn{background:none;border:1px solid var(--line);color:var(--mut);border-radius:8px;padding:5px 11px;
+  font-family:'Space Grotesk';font-size:11.5px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px}
+.collapsebtn:hover{border-color:var(--blue);color:var(--blue2)}
+.collapsebtn .chev{transition:transform .2s}
+.collapsible{overflow:hidden;transition:max-height .25s ease, opacity .2s ease;max-height:600px;opacity:1}
+.collapsible.collapsed{max-height:0;opacity:0}
+.collapsebtn.collapsed .chev{transform:rotate(-90deg)}
+
+/* ---- traductores: lista larga con scroll ---- */
+.cvscroll{overflow-y:auto;overflow-x:hidden}
+
 @media(max-width:900px){
   .kstrip{grid-template-columns:repeat(3,1fr)} .grid2,.grid3,.ins,.qualproj{grid-template-columns:1fr}
   .peakcalls{grid-template-columns:1fr}
@@ -156,17 +176,33 @@ table.ptab tr.realrow td{background:#46c79a12}
       <div class="brand">
         <div class="logo"><svg viewBox="0 0 24 24" fill="none"><path d="M4 5h11l-2.5 3.5L15 12H4z" fill="#fff" opacity=".95"/><path d="M4 5v14" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg></div>
         <div>
-          <h1>Reporte de Traducciones</h1>
+          <h1>Traducciones</h1>
           <div class="sub">Área de Engagement (SDS) · Compassion International Perú</div>
         </div>
       </div>
+      <div class="tabnav" id="tabNav">
+        <button data-view="reporte" class="on">Reporte de Traducciones</button>
+        <button data-view="presupuesto">Presupuesto</button>
+      </div>
       <div class="stamp"><span id="stampRange"></span><br><span id="stampMeses"></span><br><span id="gen"></span></div>
     </div>
+  </div>
+</header>
+
+<div class="wrap">
+<div id="viewReporte">
+
+  <div class="panelhead" id="panelToggleRep">
+    <span class="lbl2">Indicadores y filtros</span>
+    <button class="collapsebtn" id="btnCollapseRep"><span class="chev">▾</span> Plegar</button>
+  </div>
+  <div class="collapsible" id="panelBodyRep">
     <div class="kstrip" id="kstrip"></div>
 
     <div class="filterbar">
       <div class="fgroup"><label>FY desde</label><select id="fFyFrom"></select></div>
       <div class="fgroup"><label>FY hasta</label><select id="fFyTo"></select></div>
+      <div class="fgroup"><label>Mes</label><select id="fMes"></select></div>
       <div class="fgroup"><label>Proveedor</label><select id="fVendor"></select></div>
       <div class="fgroup"><label>Traductor</label><select id="fTrad"></select></div>
       <div class="fgroup"><label>Plantilla</label><select id="fTemp"></select></div>
@@ -185,9 +221,6 @@ table.ptab tr.realrow td{background:#46c79a12}
       <button class="fbtn" id="btnBackToPublished" style="margin-left:auto">Volver a datos publicados</button>
     </div>
   </div>
-</header>
-
-<div class="wrap">
 
   <!-- TENDENCIA -->
   <section>
@@ -320,9 +353,9 @@ table.ptab tr.realrow td{background:#46c79a12}
     <p class="lead">A la izquierda, los traductores de mayor volumen (balance de carga). A la derecha, el mapa volumen × tasa de error: el cuadrante superior derecho marca a quién dar retroalimentación primero.</p>
     <div class="grid2">
       <div class="card">
-        <h3>Top 15 traductores por volumen</h3>
-        <div class="h3sub">Traducciones acumuladas (histórico)</div>
-        <div class="cv h340"><canvas id="cTop"></canvas></div>
+        <h3>Traductores por volumen</h3>
+        <div class="h3sub" id="topSub">Traducciones acumuladas (histórico) · todos los traductores del periodo filtrado</div>
+        <div class="cv cvscroll" id="cTopWrap" style="height:340px"><canvas id="cTop"></canvas></div>
       </div>
       <div class="card">
         <h3>Volumen × tasa de issues</h3>
@@ -348,6 +381,87 @@ table.ptab tr.realrow td{background:#46c79a12}
       <ul id="caveatList"></ul>
     </div>
   </section>
+
+</div><!-- /viewReporte -->
+
+<div id="viewPresupuesto" style="display:none">
+
+  <div class="panelhead" id="panelToggleBud">
+    <span class="lbl2">Indicadores y filtros</span>
+    <button class="collapsebtn" id="btnCollapseBud"><span class="chev">▾</span> Plegar</button>
+  </div>
+  <div class="collapsible" id="panelBodyBud">
+    <div class="filterbar">
+      <div class="fgroup"><label>FY desde</label><select id="bFyFrom"></select></div>
+      <div class="fgroup"><label>FY hasta</label><select id="bFyTo"></select></div>
+      <div class="fgroup"><label>Proveedor (Tipo Traductor)</label><select id="bTipo"></select></div>
+      <button class="fbtn" id="btnClearBudgetFilters">Limpiar filtros</button>
+      <div class="fspacer"></div>
+      <div class="filecol">
+        <label>Cargar Excel de presupuesto (vista previa)</label>
+        <input type="file" id="fileUploadBudget" accept=".xlsx,.xls,.csv">
+        <div id="fileStatusBudget"></div>
+      </div>
+    </div>
+    <div class="activefilters" id="activeFiltersBudget"></div>
+    <div class="previewbar" id="previewBarBudget">
+      ⚠ Estás viendo una <b>vista previa</b> de <span id="previewFileBudget"></span> — solo en tu navegador, nadie más la ve.
+      Para publicarla, reemplaza <code>datos/presupuesto.xlsx</code>, corre <code>generar.py</code> y haz push.
+      <button class="fbtn" id="btnBackToPublishedBudget" style="margin-left:auto">Volver a datos publicados</button>
+    </div>
+
+    <div id="noBudgetMsg" style="display:none;margin-top:20px" class="caveat">
+      <h4>Sin datos de presupuesto</h4>
+      <p style="color:var(--mut);font-size:13px">Todavía no hay un Excel de presupuesto publicado en <code>datos/</code>. Carga uno arriba para ver una vista previa, o pídele a Samuel que lo agregue y regenere el reporte.</p>
+    </div>
+
+    <div class="kstrip" id="bKstrip" style="margin-top:18px"></div>
+  </div>
+
+  <section style="margin-top:26px">
+    <div class="eyebrow">Presupuesto</div>
+    <h2>Budget, pagos y licencias</h2>
+    <p class="lead">Ejecución mensual de presupuesto frente a pago real, costo por carta traducida y gasto en licencias, por <b>Tipo Traductor</b>. Fuente independiente del reporte de traducciones — se actualiza cargando el Excel de presupuesto.</p>
+
+    <div class="card">
+      <h3>Budget vs. pago real por mes</h3>
+      <div class="h3sub">Barras: budget asignado · Línea: pago total ejecutado</div>
+      <div class="cv h320"><canvas id="cBudgetVsReal"></canvas></div>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <h3>% de ejecución y variación presupuestal por mes</h3>
+      <div class="h3sub">Barras: variación (pago real − budget, S/) · Línea: % ejecutado del budget del mes</div>
+      <div class="cv h280"><canvas id="cVariacion"></canvas></div>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <h3>Ahorro / pérdida acumulado · <span id="ahorroFyLabel"></span></h3>
+      <div class="h3sub" id="ahorroSub">Suma acumulada de la variación mensual (budget − pago real). Positivo = ahorro.</div>
+      <div class="cv h280"><canvas id="cAhorroAcum"></canvas></div>
+      <div class="peakcalls" id="ahorroCards" style="margin-top:16px;grid-template-columns:repeat(auto-fit,minmax(180px,1fr))"></div>
+    </div>
+
+    <div class="grid2" style="margin-top:16px">
+      <div class="card">
+        <h3>Costo por carta traducida</h3>
+        <div class="h3sub">Pago total ÷ cartas traducidas, por mes</div>
+        <div class="cv h280"><canvas id="cCostoCarta"></canvas></div>
+      </div>
+      <div class="card">
+        <h3>Pago por Tipo Traductor · por año fiscal</h3>
+        <div class="h3sub">Pago total ejecutado</div>
+        <div class="cv h280"><canvas id="cPagoTipoFy"></canvas></div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <h3>Licencias: cantidad y costo total</h3>
+      <div class="h3sub">Barras: costo total de licencia · Línea: cantidad de licencias</div>
+      <div class="cv h280"><canvas id="cLicencias"></canvas></div>
+    </div>
+  </section>
+</div><!-- /viewPresupuesto -->
 
   <footer>
     Vista previa (snapshot) generada sobre 55,598 registros históricos · Los datos están incrustados en este archivo — se comparte por link y abre sin cargar nada.<br>
@@ -397,6 +511,7 @@ function calcular(src, filt){
     const fy = lu.fy[f];
     if(fFrom!=null && fy<fFrom) continue;
     if(fTo!=null && fy>fTo) continue;
+    if(filt.mes!=null && lu.mesfy[f]!==filt.mes) continue;
     fechaIdxVisible.push(f);
   }
 
@@ -504,11 +619,10 @@ function calcular(src, filt){
     tasa_iss: tempSorted.map(([,e])=>pct(e.i,e.v)) };
 
   const tradMap = groupBy(raw.tr);
-  const tradEntries = [...tradMap.entries()].filter(([,e])=>e.v>=500).sort((a,b)=>b[1].v-a[1].v);
-  const top = tradEntries.slice(0,15);
-  const top_trad = { nombre: top.map(([k])=>lu.traductores[k]), vol: top.map(([,e])=>e.v),
-    tasa_iss: top.map(([,e])=>pct(e.i,e.v)) };
-  const scatter = tradEntries.map(([k,e])=>({ n:lu.traductores[k], x:e.v, y:pct(e.i,e.v) }));
+  const tradEntries = [...tradMap.entries()].sort((a,b)=>b[1].v-a[1].v);
+  const top_trad = { nombre: tradEntries.map(([k])=>lu.traductores[k]), vol: tradEntries.map(([,e])=>e.v),
+    tasa_iss: tradEntries.map(([,e])=>pct(e.i,e.v)) };
+  const scatter = tradEntries.filter(([,e])=>e.v>=500).map(([k,e])=>({ n:lu.traductores[k], x:e.v, y:pct(e.i,e.v) }));
 
   return { kpi, serie, estacional, anual, proyeccion, vendor, vendor_fy, template, top_trad, scatter,
     meta: { rango: fechaIdxVisible.length? lu.fechas[fechaIdxVisible[0]]+' → '+lu.fechas[fechaIdxVisible[fechaIdxVisible.length-1]] : '',
@@ -594,7 +708,7 @@ function procesarFilas(rows){
 // ESTADO + RENDER
 // =====================================================================
 let SRC = { raw: RAW, lookup: LU, alertas: D.alertas || [] };
-let FILT = { fyFrom:null, fyTo:null, vendor:null, trad:null, temp:null };
+let FILT = { fyFrom:null, fyTo:null, mes:null, vendor:null, trad:null, temp:null };
 let objOverride = null;
 let prod = META.prod_default || PRODS[Math.floor(PRODS.length/2)];
 let lastD2 = null;
@@ -610,12 +724,15 @@ function populateFilterOptions(lu){
   $('fVendor').innerHTML = mkOpt(lu.vendors); $('fVendor').value='';
   $('fTemp').innerHTML = mkOpt(lu.templates); $('fTemp').value='';
   $('fTrad').innerHTML = mkOpt(lu.traductores); $('fTrad').value='';
-  FILT = { fyFrom: fys[0], fyTo: fys[fys.length-1], vendor:null, trad:null, temp:null };
+  $('fMes').innerHTML = '<option value="">Todos</option>'+FYORDER.map(m=>`<option value="${m}">${m.slice(3)}</option>`).join('');
+  $('fMes').value='';
+  FILT = { fyFrom: fys[0], fyTo: fys[fys.length-1], mes:null, vendor:null, trad:null, temp:null };
 }
 
 function updateActiveFiltersText(lu){
   const parts=[]; const fys=[...new Set(lu.fy)].sort((a,b)=>a-b);
   if(FILT.fyFrom!==fys[0] || FILT.fyTo!==fys[fys.length-1]) parts.push(`FY${FILT.fyFrom}–FY${FILT.fyTo}`);
+  if(FILT.mes!=null) parts.push('Mes: '+FILT.mes.slice(3));
   if(FILT.vendor!=null) parts.push('Proveedor: '+lu.vendors[FILT.vendor]);
   if(FILT.trad!=null) parts.push('Traductor: '+lu.traductores[FILT.trad]);
   if(FILT.temp!=null) parts.push('Plantilla: '+lu.templates[FILT.temp]);
@@ -664,12 +781,18 @@ function renderAll(D2){
    ['g',k.cobertura+'%','Cobertura QA'],['a',k.tasa_iss+'%','Tasa de issues']];
   $('kstrip').innerHTML=cards.map(c=>`<div class="kpi ${c[0]}"><div class="num">${c[1]}</div><div class="lbl">${c[2]}</div></div>`).join('');
 
+  const trendAvg = D2.serie.vol.length? D2.serie.vol.reduce((a,b)=>a+b,0)/D2.serie.vol.length : 0;
   destroyChart('trend');
   charts.trend = new Chart(cTrend,{type:'line',data:{labels:D2.serie.fecha,datasets:[{
+    label:'Volumen',order:2,
     data:D2.serie.vol,borderColor:C.blue,borderWidth:2,tension:.35,pointRadius:2,pointHoverRadius:5,
     pointBackgroundColor:D2.serie.vol.map((v,i)=>{const m=D2.serie.fecha[i];return(m.startsWith('Nov')||m.startsWith('Dec'))?C.amber:C.blue}),
     fill:true,backgroundColor:(ctx)=>{const g=ctx.chart.ctx.createLinearGradient(0,0,0,300);g.addColorStop(0,'#4fa3f733');g.addColorStop(1,'#4fa3f700');return g}
-  }]},options:{maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>fmt(c.raw)+' traducciones'}}},
+  },{
+    label:'Promedio',order:1,data:D2.serie.vol.map(()=>trendAvg),borderColor:C.green,borderWidth:2,
+    borderDash:[6,5],pointRadius:0,pointHoverRadius:0,tension:0,fill:false
+  }]},options:{maintainAspectRatio:false,plugins:{legend:{display:true,labels:{usePointStyle:true,boxWidth:8},align:'end'},
+    tooltip:{callbacks:{label:c=>c.dataset.label+': '+fmt(c.raw)+' traducciones'}}},
     scales:{x:{grid:noGrid,ticks:{maxTicksLimit:14,autoSkip:true}},y:{grid:grid,ticks:{callback:v=>v/1000+'k'}}}}});
 
   destroyChart('season');
@@ -728,8 +851,8 @@ function renderAll(D2){
 
   destroyChart('vendor');
   charts.vendor = new Chart(cVendor,{data:{labels:D2.vendor.nombre,datasets:[
-   {type:'bar',label:'Volumen',data:D2.vendor.vol,yAxisID:'y',backgroundColor:C.blue,borderRadius:5},
-   {type:'line',label:'% Issues',data:D2.vendor.tasa_iss,yAxisID:'y1',borderColor:C.amber,borderWidth:3,pointRadius:5,pointBackgroundColor:C.amber,tension:.3}
+   {type:'bar',label:'Volumen',order:2,data:D2.vendor.vol,yAxisID:'y',backgroundColor:C.blue,borderRadius:5},
+   {type:'line',label:'% Issues',order:1,data:D2.vendor.tasa_iss,yAxisID:'y1',borderColor:C.amber,borderWidth:3,pointRadius:5,pointBackgroundColor:C.amber,pointBorderColor:C.bg,pointBorderWidth:2,tension:.3}
   ]},options:{maintainAspectRatio:false,plugins:{legend:{labels:{usePointStyle:true,boxWidth:8},align:'end'},
     tooltip:{callbacks:{label:c=>c.dataset.yAxisID==='y1'?c.raw+'% issues':fmt(c.raw)}}},
    scales:{x:{grid:noGrid},y:{grid:grid,ticks:{callback:v=>v/1000+'k'}},y1:{position:'right',grid:noGrid,min:0,ticks:{callback:v=>v+'%'}}}}});
@@ -748,6 +871,8 @@ function renderAll(D2){
     tooltip:{callbacks:{label:c=>fmt(c.raw)+' · '+D2.template.tasa_iss[c.dataIndex]+'% issues'}}},
    scales:{x:{grid:grid,ticks:{callback:v=>v/1000+'k'}},y:{grid:noGrid}}}});
 
+  $('topSub').textContent = D2.top_trad.nombre.length+' traductores en el periodo filtrado';
+  $('cTopWrap').style.height = Math.max(340, D2.top_trad.nombre.length*20)+'px';
   destroyChart('top');
   charts.top = new Chart(cTop,{type:'bar',data:{labels:D2.top_trad.nombre,datasets:[{data:D2.top_trad.vol,
     backgroundColor:C.blue2,borderRadius:4}]},
@@ -768,6 +893,228 @@ function renderAll(D2){
 }
 
 // =====================================================================
+// PRESUPUESTO — motor de cálculo y render, independiente del reporte de
+// traducciones (su propia fuente, filtros y carga de Excel).
+// =====================================================================
+const TCOL = {'General':C.blue,'WH':C.green,'Otros':C.amber};
+
+function calcularBudget(src, filt){
+  const raw = src.raw, lu = src.lookup, n = raw.fy.length;
+  const idxs = [];
+  for(let i=0;i<n;i++){
+    const fy = raw.fy[i];
+    if(filt.fyFrom!=null && fy<filt.fyFrom) continue;
+    if(filt.fyTo!=null && fy>filt.fyTo) continue;
+    if(filt.tipo!=null && raw.tipo[i]!==filt.tipo) continue;
+    idxs.push(i);
+  }
+  const perKey = new Map();
+  idxs.forEach(i=>{
+    const k = raw.fy[i]+'|'+raw.mesfy[i];
+    let e = perKey.get(k);
+    if(!e){ e = {fy:raw.fy[i], mesfy:raw.mesfy[i], label:raw.label[i], budget:0, costo_lic_total:0, q_lic:0, pago_cartas:0, pago_total:0, q_cartas:0, tieneReal:false}; perKey.set(k,e); }
+    e.budget += raw.budget[i]||0;
+    e.costo_lic_total += raw.costo_lic_total[i]||0;
+    e.q_lic += raw.q_lic[i]||0;
+    if(raw.pago_total[i]!=null){
+      e.pago_cartas += raw.pago_cartas[i]||0; e.pago_total += raw.pago_total[i]||0;
+      e.q_cartas += raw.q_cartas[i]||0; e.tieneReal = true;
+    }
+  });
+  const keys = [...perKey.keys()].sort((a,b)=>{
+    const [fya,ma]=a.split('|'), [fyb,mb]=b.split('|');
+    if(+fya!==+fyb) return fya-fyb;
+    return FYORDER.indexOf(ma)-FYORDER.indexOf(mb);
+  });
+  const serie = { label:[], budget:[], pago_total:[], costo_carta:[], costo_lic_total:[], q_lic:[],
+    variacion:[], pct_ejecucion:[] };
+  keys.forEach(k=>{
+    const e = perKey.get(k);
+    serie.label.push(e.label || (e.mesfy.slice(3)+' '+String(e.fy).slice(-2)));
+    serie.budget.push(Math.round(e.budget));
+    serie.pago_total.push(e.tieneReal? Math.round(e.pago_total) : null);
+    serie.costo_carta.push(e.tieneReal && e.q_cartas? Math.round(e.pago_total/e.q_cartas*100)/100 : null);
+    serie.costo_lic_total.push(Math.round(e.costo_lic_total));
+    serie.q_lic.push(e.q_lic);
+    // variación = budget - pago real (positivo = ahorro ese mes, negativo = sobregasto)
+    serie.variacion.push(e.tieneReal? Math.round(e.budget-e.pago_total) : null);
+    serie.pct_ejecucion.push(e.tieneReal && e.budget? Math.round(e.pago_total/e.budget*1000)/10 : null);
+  });
+
+  // acumulado (ahorro/pérdida) — solo sobre meses con dato real, en orden cronológico,
+  // se corta en el último mes con dato real (no proyecta meses futuros como "ahorro").
+  const acumLabel=[], acumValor=[];
+  let run=0;
+  keys.forEach(k=>{
+    const e = perKey.get(k);
+    if(!e.tieneReal) return;
+    run += (e.budget-e.pago_total);
+    acumLabel.push(e.label || (e.mesfy.slice(3)+' '+String(e.fy).slice(-2)));
+    acumValor.push(Math.round(run));
+  });
+  const acumulado = { label: acumLabel, valor: acumValor };
+
+  let tot = {budget:0, pago_total:0, q_cartas:0, costo_lic_total:0}, hayReal=false, mesesReal=0;
+  perKey.forEach(e=>{ tot.budget+=e.budget; tot.costo_lic_total+=e.costo_lic_total;
+    if(e.tieneReal){ tot.pago_total+=e.pago_total; tot.q_cartas+=e.q_cartas; hayReal=true; mesesReal++; } });
+  const kpi = {
+    budget: Math.round(tot.budget),
+    pago_total: hayReal? Math.round(tot.pago_total) : null,
+    ejecucion: (hayReal && tot.budget)? Math.round(tot.pago_total/tot.budget*1000)/10 : null,
+    q_cartas: hayReal? Math.round(tot.q_cartas) : null,
+    costo_prom_carta: (hayReal && tot.q_cartas)? Math.round(tot.pago_total/tot.q_cartas*100)/100 : null,
+    costo_lic_total: Math.round(tot.costo_lic_total),
+  };
+
+  // ahorro/pérdida acumulado "a la fecha" — % del budget total del rango filtrado, más
+  // proyección a cierre de FY si el rango filtrado es exactamente un año fiscal.
+  const cumBudgetRun = keys.reduce((s,k)=> s + (perKey.get(k).tieneReal? perKey.get(k).budget : 0), 0);
+  const cumPagoRun = tot.pago_total;
+  const ahorroMonto = Math.round(cumBudgetRun - cumPagoRun);
+  const ahorro = hayReal && tot.budget ? {
+    pctBudgetAFecha: Math.round(cumBudgetRun/tot.budget*1000)/10,
+    pctGastadoAFecha: Math.round(cumPagoRun/tot.budget*1000)/10,
+    pctAhorro: Math.round(ahorroMonto/tot.budget*1000)/10,
+    monto: ahorroMonto,
+    mesesReal, mesesTotal: keys.length,
+    esFyUnico: filt.fyFrom===filt.fyTo,
+    proyeccionCierre: (filt.fyFrom===filt.fyTo && mesesReal>0 && keys.length>mesesReal)
+      ? Math.round(ahorroMonto * (keys.length/mesesReal)) : null,
+  } : null;
+
+  const tipoFyMap = new Map();
+  idxs.forEach(i=>{
+    if(raw.pago_total[i]==null) return;
+    const t = raw.tipo[i], fy = raw.fy[i];
+    let mm = tipoFyMap.get(fy); if(!mm){ mm=new Map(); tipoFyMap.set(fy,mm); }
+    mm.set(t, (mm.get(t)||0) + (raw.pago_total[i]||0));
+  });
+  const fyListPago = [...tipoFyMap.keys()].sort((a,b)=>a-b);
+  const tiposUsados = filt.tipo!=null? [filt.tipo] : lu.tipos.map((_,i)=>i);
+  const pago_tipo_fy = { fy: fyListPago.map(y=>'FY'+y), series: {} };
+  tiposUsados.forEach(ti=>{ pago_tipo_fy.series[lu.tipos[ti]] = fyListPago.map(y=>Math.round((tipoFyMap.get(y)||new Map()).get(ti)||0)); });
+
+  return { serie, kpi, pago_tipo_fy, acumulado, ahorro };
+}
+
+// Lee por posición de columna (no por nombre de encabezado) para que coincida
+// exactamente con BUDGET_COLS de generar.py y no dependa de tildes/variantes.
+function procesarFilasBudget(matriz){
+  if(matriz.length<2) throw new Error('El archivo no tiene filas de datos.');
+  const body = matriz.slice(1).filter(r=>r && r[0]!=null && r[0]!=='');
+  if(!body.length) throw new Error('El archivo no tiene filas de datos.');
+  const tipos = [...new Set(body.map(r=>String(r[4])))].sort();
+  const tIdx = new Map(tipos.map((x,i)=>[x,i]));
+  const num = v => (v===null||v===undefined||v==='')? null : Number(v);
+  const parseLabel = v => {
+    const m = String(v).match(/^(\d{2})[_\s]?([A-Za-zÀ-ÿ]+)$/);
+    return m ? (m[2]+' '+m[1]) : String(v);
+  };
+  const raw = {
+    fy: body.map(r=>Number(r[0])),
+    mesfy: body.map(r=>String(r[2]).replace('_','.')),
+    label: body.map(r=>parseLabel(r[3])),
+    tipo: body.map(r=>tIdx.get(String(r[4]))),
+    budget: body.map(r=>num(r[5])||0),
+    costo_lic_total: body.map(r=>num(r[8])||0),
+    q_lic: body.map(r=>num(r[6])||0),
+    pago_cartas: body.map(r=>num(r[10])),
+    pago_total: body.map(r=>num(r[11])),
+    q_cartas: body.map(r=>num(r[12])),
+  };
+  return { raw, lookup: { tipos, fys: [...new Set(raw.fy)].sort((a,b)=>a-b) } };
+}
+
+function renderBudget(RB){
+  const k = RB.kpi;
+  const cards = [
+    ['blue', fmt(k.budget), 'Budget total'],
+    ['g', k.pago_total!=null? fmt(k.pago_total):'—', 'Pago total ejecutado'],
+    ['a', k.ejecucion!=null? k.ejecucion+'%':'—', '% Ejecución'],
+    ['blue', k.q_cartas!=null? fmt(k.q_cartas):'—', 'Cartas traducidas'],
+    ['g', k.costo_prom_carta!=null? 'S/ '+k.costo_prom_carta.toFixed(2):'—', 'Costo prom. / carta'],
+    ['r', fmt(k.costo_lic_total), 'Costo total licencias'],
+  ];
+  $('bKstrip').innerHTML = cards.map(c=>`<div class="kpi ${c[0]}"><div class="num">${c[1]}</div><div class="lbl">${c[2]}</div></div>`).join('');
+
+  destroyChart('budgetVsReal');
+  charts.budgetVsReal = new Chart(cBudgetVsReal,{data:{labels:RB.serie.label,datasets:[
+    {type:'bar',label:'Budget',order:2,data:RB.serie.budget,backgroundColor:C.blue,borderRadius:5},
+    {type:'line',label:'Pago real',order:1,data:RB.serie.pago_total,borderColor:C.amber,borderWidth:3,
+     pointRadius:4,pointBackgroundColor:C.amber,pointBorderColor:C.bg,pointBorderWidth:2,spanGaps:false,tension:.25}
+  ]},options:{maintainAspectRatio:false,plugins:{legend:{labels:{usePointStyle:true,boxWidth:8},align:'end'},
+    tooltip:{callbacks:{label:c=>c.dataset.label+': S/ '+fmt(c.raw)}}},
+   scales:{x:{grid:noGrid,ticks:{maxTicksLimit:14,autoSkip:true}},y:{grid:grid,ticks:{callback:v=>'S/ '+(Math.round(v/100)/10)+'k'}}}}});
+
+  destroyChart('variacion');
+  charts.variacion = new Chart(cVariacion,{data:{labels:RB.serie.label,datasets:[
+    {type:'bar',label:'Variación (S/)',order:2,data:RB.serie.variacion,yAxisID:'y',borderRadius:5,
+     backgroundColor:RB.serie.variacion.map(v=>v==null?C.mut:(v>=0?C.green:C.red))},
+    {type:'line',label:'% ejecutado',order:1,data:RB.serie.pct_ejecucion,yAxisID:'y1',borderColor:C.amber,
+     borderWidth:3,pointRadius:4,pointBackgroundColor:C.amber,pointBorderColor:C.bg,pointBorderWidth:2,spanGaps:false,tension:.25}
+  ]},options:{maintainAspectRatio:false,plugins:{legend:{labels:{usePointStyle:true,boxWidth:8},align:'end'},
+    tooltip:{callbacks:{label:c=>c.dataset.yAxisID==='y1'? '% ejecutado: '+c.raw+'%' : 'Variación: '+(c.raw>=0?'+':'')+'S/ '+fmt(c.raw)+(c.raw>=0?' (ahorro)':' (sobregasto)')}}},
+   scales:{x:{grid:noGrid,ticks:{maxTicksLimit:14,autoSkip:true}},y:{grid:grid,ticks:{callback:v=>'S/ '+(Math.round(v/100)/10)+'k'}},
+     y1:{position:'right',grid:noGrid,ticks:{callback:v=>v+'%'}}}}});
+
+  destroyChart('ahorroAcum');
+  $('ahorroFyLabel').textContent = RB.ahorro && RB.ahorro.esFyUnico ? ('FY'+FILT_BUDGET.fyFrom) : '';
+  charts.ahorroAcum = new Chart(cAhorroAcum,{type:'line',data:{labels:RB.acumulado.label,datasets:[{
+    data:RB.acumulado.valor,borderColor:C.green,borderWidth:2,tension:.25,pointRadius:2,pointHoverRadius:5,
+    pointBackgroundColor:RB.acumulado.valor.map(v=>v>=0?C.green:C.red),
+    segment:{borderColor:ctx=>(ctx.p0.parsed.y<0||ctx.p1.parsed.y<0)?C.red:C.green},
+    fill:true,backgroundColor:(ctx)=>{const g=ctx.chart.ctx.createLinearGradient(0,0,0,280);g.addColorStop(0,'#46c79a2e');g.addColorStop(1,'#46c79a00');return g}
+  }]},options:{maintainAspectRatio:false,plugins:{legend:{display:false},
+    tooltip:{callbacks:{label:c=>'Acumulado: '+(c.raw>=0?'+':'')+'S/ '+fmt(c.raw)+(c.raw>=0?' ahorro':' pérdida')}}},
+   scales:{x:{grid:noGrid,ticks:{maxTicksLimit:14,autoSkip:true}},y:{grid:grid,ticks:{callback:v=>'S/ '+(Math.round(v/100)/10)+'k'}}}}});
+
+  if(RB.ahorro){
+    const a = RB.ahorro;
+    const cards = [
+      ['blue', a.pctBudgetAFecha+'%', 'Budget acumulado a la fecha'],
+      ['a', a.pctGastadoAFecha+'%', 'Gastado acumulado a la fecha'],
+      [a.pctAhorro>=0?'g':'r', (a.pctAhorro>=0?'+':'')+a.pctAhorro+'%', a.pctAhorro>=0?'% ahorro acumulado':'% sobregasto acumulado'],
+    ];
+    if(a.esFyUnico && a.proyeccionCierre!=null){
+      cards.push([a.proyeccionCierre>=0?'g':'r',
+        (a.proyeccionCierre>=0?'+':'')+'S/ '+fmt(a.proyeccionCierre),
+        'Proyección a cierre de FY (al ritmo actual)']);
+    }
+    $('ahorroCards').innerHTML = cards.map(c=>`<div class="pc"><div class="t">${c[2]}</div><div class="v" style="color:var(--${c[0]==='g'?'green':c[0]==='r'?'red':c[0]==='a'?'amber':'blue2'})">${c[1]}</div></div>`).join('');
+    $('ahorroSub').textContent = 'Monto acumulado: '+(a.monto>=0?'+':'')+'S/ '+fmt(a.monto)+(a.monto>=0?' de ahorro':' de sobregasto')+' en '+a.mesesReal+' mes(es) con dato real.'
+      +(a.esFyUnico && a.proyeccionCierre!=null? ' Si el ritmo de ahorro se mantiene, cierre de FY estimado en '+(a.proyeccionCierre>=0?'+':'')+'S/ '+fmt(a.proyeccionCierre)+'.' : '');
+  } else {
+    $('ahorroCards').innerHTML = '';
+    $('ahorroSub').textContent = 'Sin datos reales todavía en el periodo filtrado.';
+  }
+
+  destroyChart('costoCarta');
+  charts.costoCarta = new Chart(cCostoCarta,{type:'line',data:{labels:RB.serie.label,datasets:[{
+    data:RB.serie.costo_carta,borderColor:C.green,borderWidth:2,tension:.3,pointRadius:2,spanGaps:false,
+    fill:true,backgroundColor:'#46c79a22'}]},
+   options:{maintainAspectRatio:false,plugins:{legend:{display:false},
+    tooltip:{callbacks:{label:c=>c.raw!=null?('S/ '+c.raw.toFixed(2)+' / carta'):'sin dato'}}},
+   scales:{x:{grid:noGrid,ticks:{maxTicksLimit:14,autoSkip:true}},y:{grid:grid,ticks:{callback:v=>'S/ '+(Math.round(v*100)/100)}}}}});
+
+  destroyChart('pagoTipoFy');
+  charts.pagoTipoFy = new Chart(cPagoTipoFy,{type:'bar',data:{labels:RB.pago_tipo_fy.fy,datasets:Object.keys(RB.pago_tipo_fy.series).map(k=>({
+    label:k,data:RB.pago_tipo_fy.series[k],backgroundColor:TCOL[k]||C.mut,borderRadius:3,stack:'s'}))},
+   options:{maintainAspectRatio:false,plugins:{legend:{labels:{usePointStyle:true,boxWidth:8},align:'end'},
+    tooltip:{callbacks:{label:c=>c.dataset.label+': S/ '+fmt(c.raw)}}},
+   scales:{x:{grid:noGrid,stacked:true},y:{grid:grid,stacked:true,ticks:{callback:v=>'S/ '+v/1000+'k'}}}}});
+
+  destroyChart('licencias');
+  charts.licencias = new Chart(cLicencias,{data:{labels:RB.serie.label,datasets:[
+    {type:'bar',label:'Costo total licencia',order:2,data:RB.serie.costo_lic_total,yAxisID:'y',backgroundColor:C.blue2,borderRadius:5},
+    {type:'line',label:'Cantidad licencias',order:1,data:RB.serie.q_lic,yAxisID:'y1',borderColor:C.amber,borderWidth:3,
+     pointRadius:4,pointBackgroundColor:C.amber,pointBorderColor:C.bg,pointBorderWidth:2,tension:.3}
+  ]},options:{maintainAspectRatio:false,plugins:{legend:{labels:{usePointStyle:true,boxWidth:8},align:'end'},
+    tooltip:{callbacks:{label:c=>c.dataset.yAxisID==='y1'? c.raw+' licencias' : 'S/ '+fmt(c.raw)}}},
+   scales:{x:{grid:noGrid,ticks:{maxTicksLimit:14,autoSkip:true}},y:{grid:grid,ticks:{callback:v=>'S/ '+(Math.round(v/100)/10)+'k'}},
+     y1:{position:'right',grid:noGrid,min:0,ticks:{stepSize:1}}}}});
+}
+
+// =====================================================================
 // WIRING — filtros, objetivo ajustable, toggle de productividad, carga de Excel
 // =====================================================================
 document.querySelectorAll('#prodToggle button').forEach(b=>b.onclick=()=>{
@@ -775,10 +1122,11 @@ document.querySelectorAll('#prodToggle button').forEach(b=>b.onclick=()=>{
   b.classList.add('on'); prod=+b.dataset.p; renderAll(lastD2); updateActiveFiltersText(SRC.lookup);
 });
 
-['fFyFrom','fFyTo','fVendor','fTrad','fTemp'].forEach(id=>{
+['fFyFrom','fFyTo','fMes','fVendor','fTrad','fTemp'].forEach(id=>{
   $(id).addEventListener('change', ()=>{
     FILT.fyFrom = Number($('fFyFrom').value);
     FILT.fyTo = Number($('fFyTo').value);
+    FILT.mes = $('fMes').value===''? null : $('fMes').value;
     FILT.vendor = $('fVendor').value===''? null : Number($('fVendor').value);
     FILT.trad = $('fTrad').value===''? null : Number($('fTrad').value);
     FILT.temp = $('fTemp').value===''? null : Number($('fTemp').value);
@@ -832,6 +1180,106 @@ $('btnBackToPublished').addEventListener('click', ()=>{
   $('fileStatus').className=''; $('fileStatus').textContent='';
   $('previewBar').classList.remove('on');
 });
+
+// ---- presupuesto: estado, filtros, carga de excel ----
+let SRC_BUDGET = D.budget ? { raw: D.budget.raw, lookup: D.budget.lookup } : null;
+let FILT_BUDGET = { fyFrom:null, fyTo:null, tipo:null };
+
+function populateBudgetFilterOptions(lu){
+  const fys = lu.fys.slice().sort((a,b)=>a-b);
+  $('bFyFrom').innerHTML = fys.map(y=>`<option value="${y}">FY${y}</option>`).join('');
+  $('bFyTo').innerHTML = fys.map(y=>`<option value="${y}">FY${y}</option>`).join('');
+  $('bFyFrom').value = fys[0]; $('bFyTo').value = fys[fys.length-1];
+  $('bTipo').innerHTML = '<option value="">Todos</option>'+lu.tipos.map((n,i)=>`<option value="${i}">${n}</option>`).join('');
+  $('bTipo').value = '';
+  FILT_BUDGET = { fyFrom: fys[0], fyTo: fys[fys.length-1], tipo: null };
+}
+
+function updateActiveFiltersBudgetText(lu){
+  const parts=[]; const fys=lu.fys.slice().sort((a,b)=>a-b);
+  if(FILT_BUDGET.fyFrom!==fys[0] || FILT_BUDGET.fyTo!==fys[fys.length-1]) parts.push(`FY${FILT_BUDGET.fyFrom}–FY${FILT_BUDGET.fyTo}`);
+  if(FILT_BUDGET.tipo!=null) parts.push('Tipo: '+lu.tipos[FILT_BUDGET.tipo]);
+  $('activeFiltersBudget').textContent = parts.length? 'Filtrando: '+parts.join(' · ') : '';
+}
+
+function computeAndRenderBudget(){
+  if(!SRC_BUDGET){ $('noBudgetMsg').style.display='block'; return; }
+  $('noBudgetMsg').style.display='none';
+  const RB = calcularBudget(SRC_BUDGET, FILT_BUDGET);
+  renderBudget(RB);
+  updateActiveFiltersBudgetText(SRC_BUDGET.lookup);
+}
+
+if(SRC_BUDGET) populateBudgetFilterOptions(SRC_BUDGET.lookup);
+else $('noBudgetMsg').style.display='block';
+
+['bFyFrom','bFyTo','bTipo'].forEach(id=>{
+  $(id).addEventListener('change', ()=>{
+    FILT_BUDGET.fyFrom = Number($('bFyFrom').value);
+    FILT_BUDGET.fyTo = Number($('bFyTo').value);
+    FILT_BUDGET.tipo = $('bTipo').value===''? null : Number($('bTipo').value);
+    computeAndRenderBudget();
+  });
+});
+$('btnClearBudgetFilters').addEventListener('click', ()=>{
+  if(SRC_BUDGET){ populateBudgetFilterOptions(SRC_BUDGET.lookup); computeAndRenderBudget(); }
+});
+
+$('fileUploadBudget').addEventListener('change', async (e)=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  $('fileStatusBudget').className=''; $('fileStatusBudget').textContent='Leyendo '+file.name+'…';
+  try{
+    const esCsv = /\.csv$/i.test(file.name);
+    const wb = esCsv ? XLSX.read(await file.text(), {type:'string'}) : XLSX.read(await file.arrayBuffer(), {type:'array'});
+    const sheet = wb.Sheets[wb.SheetNames[0]];
+    const matriz = XLSX.utils.sheet_to_json(sheet, {header:1, defval:null});
+    SRC_BUDGET = procesarFilasBudget(matriz);
+    populateBudgetFilterOptions(SRC_BUDGET.lookup);
+    computeAndRenderBudget();
+    $('previewFileBudget').textContent = file.name;
+    $('previewBarBudget').classList.add('on');
+    $('fileStatusBudget').className='ok'; $('fileStatusBudget').textContent='✓ '+(matriz.length-1).toLocaleString('es-PE')+' filas cargadas';
+  }catch(err){
+    console.error(err);
+    $('fileStatusBudget').className='err'; $('fileStatusBudget').textContent='✗ '+err.message;
+  }
+});
+
+$('btnBackToPublishedBudget').addEventListener('click', ()=>{
+  SRC_BUDGET = D.budget ? { raw: D.budget.raw, lookup: D.budget.lookup } : null;
+  if(SRC_BUDGET) populateBudgetFilterOptions(SRC_BUDGET.lookup);
+  computeAndRenderBudget();
+  $('fileUploadBudget').value = '';
+  $('fileStatusBudget').className=''; $('fileStatusBudget').textContent='';
+  $('previewBarBudget').classList.remove('on');
+});
+
+// ---- pestañas Reporte / Presupuesto ----
+document.querySelectorAll('#tabNav button').forEach(b=>b.addEventListener('click', ()=>{
+  document.querySelectorAll('#tabNav button').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on');
+  const v = b.dataset.view;
+  $('viewReporte').style.display = v==='reporte' ? '' : 'none';
+  $('viewPresupuesto').style.display = v==='presupuesto' ? '' : 'none';
+  // el cambio de vista altera el alto del documento; llevar el scroll arriba evita
+  // aterrizar a media página y un glitch de repintado del header sticky.
+  window.scrollTo(0,0);
+  if(v==='presupuesto') computeAndRenderBudget();
+}));
+
+// ---- paneles colapsables (kpis + filtros), uno por vista ----
+function wireCollapse(toggleId, bodyId, btnId){
+  let collapsed = false;
+  $(toggleId).addEventListener('click', ()=>{
+    collapsed = !collapsed;
+    $(bodyId).classList.toggle('collapsed', collapsed);
+    $(btnId).classList.toggle('collapsed', collapsed);
+    $(btnId).innerHTML = '<span class="chev">▾</span> '+(collapsed?'Desplegar':'Plegar');
+  });
+}
+wireCollapse('panelToggleRep','panelBodyRep','btnCollapseRep');
+wireCollapse('panelToggleBud','panelBodyBud','btnCollapseBud');
 
 // ---- arranque ----
 populateFilterOptions(SRC.lookup);

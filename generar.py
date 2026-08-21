@@ -18,8 +18,8 @@ if sys.stdout.encoding and sys.stdout.encoding.lower() != 'utf-8':
 
 # ─────────────────────────── CONFIGURACIÓN ───────────────────────────
 # Ajusta estos supuestos aquí; el dashboard se recalcula solo al regenerar.
-PRODUCTIVIDADES   = [500, 560, 600]   # traducciones/traductor/mes (escenarios)
-PROD_DEFAULT      = 560               # escenario mostrado por defecto
+PRODUCTIVIDADES   = [1000, 1500, 2000, 2500, 3000]   # traducciones/traductor/mes (escenarios)
+PROD_DEFAULT      = 2000              # escenario mostrado por defecto
 VOLUMEN_ANUAL_OBJ = None              # None = estimar de años completos; o fija un número
 CRECIMIENTO       = 0.0               # ajuste % opcional sobre el objetivo anual
 UMBRAL_ISSUES_ALTA = 2.0             # % de issues que marca una plantilla como "alta"
@@ -129,6 +129,42 @@ def construir(df, outlier_fechas):
         actualizado=dt.date.today().strftime('%d %b %Y'))
     return D
 
+# ─────────────────────────── PRESUPUESTO (hoja aparte) ───────────────────────────
+# Fuente independiente: pagos/licencias/budget por mes fiscal y Tipo Traductor.
+# No se cruza con el CSV de traducciones (usan convenciones de FY distintas);
+# se filtra y agrega en el navegador igual que la data principal.
+BUDGET_COLS = ['fy', 'mes', 'cod_mes', 'cod_my', 'tipo', 'budget', 'q_lic',
+               'costo_lic_unit', 'costo_lic_total', 'lic_adicional',
+               'pago_cartas', 'pago_total', 'q_cartas', 'costo_carta']
+
+def cargar_budget(path):
+    df = pd.read_excel(path, sheet_name=0)
+    if len(df.columns) < len(BUDGET_COLS):
+        raise SystemExit(f"❌ El Excel de presupuesto tiene {len(df.columns)} columnas, "
+                          f"se esperaban {len(BUDGET_COLS)}.")
+    df = df.iloc[:, :len(BUDGET_COLS)].copy()
+    df.columns = BUDGET_COLS
+    df['mesfy'] = df['cod_mes'].str.replace('_', '.', regex=False)  # '01_Jul' -> '01.Jul'
+    # Cod_MY tipo '25Jul' o '25_Jul' (año 2 dígitos + separador opcional + mes abreviado)
+    # -> etiqueta 'Jul 25' para las gráficas.
+    m = df['cod_my'].astype(str).str.extract(r'^(\d{2})[_\s]?([A-Za-zÀ-ÿ]+)$')
+    df['label'] = (m[1].fillna('') + ' ' + m[0].fillna('')).str.strip()
+    df.loc[df['label'] == '', 'label'] = df['cod_my'].astype(str)
+    return df
+
+def construir_budget(df):
+    tipos = sorted(df['tipo'].dropna().unique().tolist())
+    fys = sorted(int(x) for x in df['fy'].dropna().unique())
+    t_idx = {x: i for i, x in enumerate(tipos)}
+    num = lambda col: [float(x) if pd.notna(x) else None for x in df[col]]
+    raw = dict(
+        fy=[int(x) for x in df['fy']], mesfy=df['mesfy'].tolist(), label=df['label'].tolist(),
+        tipo=[t_idx[x] for x in df['tipo']],
+        budget=num('budget'), costo_lic_total=num('costo_lic_total'),
+        lic_adicional=num('lic_adicional'), pago_cartas=num('pago_cartas'),
+        pago_total=num('pago_total'), q_cartas=num('q_cartas'), q_lic=num('q_lic'))
+    return dict(raw=raw, lookup=dict(tipos=tipos, fys=fys))
+
 # ─────────────────────────── RENDER ───────────────────────────
 def render(D, alertas):
     D['alertas'] = alertas
@@ -152,10 +188,24 @@ def main():
     df = cargar(path)
     alertas, out_fechas = validar(df)
     D = construir(df, out_fechas)
+
+    bpath_cands = sorted(glob.glob('datos/*.xlsx') + glob.glob('datos/*.xls'),
+                          key=lambda p: __import__('os').path.getmtime(p))
+    if bpath_cands:
+        bpath = bpath_cands[-1]
+        print(f"📄 Fuente presupuesto: {bpath}")
+        D['budget'] = construir_budget(cargar_budget(bpath))
+    else:
+        print("ℹ  No hay Excel de presupuesto en datos/ — se omite la pestaña Presupuesto.")
+        D['budget'] = None
+
     render(D, alertas)
     total = int(sum(D['raw']['v']))
     print(f"✅ salida/index.html generado — {total:,} traducciones, "
           f"{len(D['lookup']['fechas'])} meses, {len(D['raw']['v']):,} filas granulares.")
+    if D['budget']:
+        print(f"✅ Presupuesto incluido — {len(D['budget']['raw']['fy'])} filas, "
+              f"tipos: {', '.join(D['budget']['lookup']['tipos'])}.")
     if alertas:
         print("⚠  Alertas de calidad del dato:")
         for a in alertas: print("   -", a)

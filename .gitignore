@@ -1,6 +1,8 @@
 salida/datos.json
 datos/*.csv
 datos/*.CSV
+datos/*.xlsx
+datos/*.xls
 __pycache__/
 *.pyc
 .venv/
