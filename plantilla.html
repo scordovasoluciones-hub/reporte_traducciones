@@ -12,14 +12,21 @@
 <style>
 :root{
   --bg:#0a1730; --bg2:#0d1d3d; --panel:#12244a; --panel2:#16294f; --line:#26386090;
-  --txt:#eaf0fb; --mut:#93a6c9; --dim:#5f739a;
+  --txt:#eaf0fb; --mut:#93a6c9; --dim:#5f739a; --sunken:#0c1c3c;
   --blue:#4fa3f7; --blue2:#7ed0ff; --amber:#f4a93b; --red:#e5595b; --green:#46c79a;
+  --radA:#16345f55; --radB:#10265033; --hdrbg:#0a1730;
+}
+:root[data-theme="light"]{
+  --bg:#f4f7fc; --bg2:#e9eff9; --panel:#ffffff; --panel2:#f6f9fd; --line:#d9e2f1;
+  --txt:#182238; --mut:#5c6b8a; --dim:#8b97af; --sunken:#eef2fa;
+  --blue:#2f6fd6; --blue2:#0f7fc4; --amber:#b8720f; --red:#c9393c; --green:#188f68;
+  --radA:#cddcf766; --radB:#dbe8ff55; --hdrbg:#f4f7fc;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
 body{background:
-    radial-gradient(1200px 600px at 80% -5%, #16345f55, transparent),
-    radial-gradient(900px 500px at 0% 5%, #10265033, transparent),
+    radial-gradient(1200px 600px at 80% -5%, var(--radA), transparent),
+    radial-gradient(900px 500px at 0% 5%, var(--radB), transparent),
     var(--bg);
   color:var(--txt); font-family:'Inter',system-ui,sans-serif; line-height:1.55;
   -webkit-font-smoothing:antialiased; padding-bottom:60px}
@@ -28,8 +35,14 @@ h1,h2,h3,.num,.eyebrow{font-family:'Space Grotesk',sans-serif}
 
 /* ---- header ---- */
 header{position:sticky;top:0;z-index:20;
-  background:linear-gradient(180deg,#0a1730f2,#0a1730d0 70%,#0a173000);
+  background:linear-gradient(180deg,
+    color-mix(in srgb, var(--hdrbg) 95%, transparent),
+    color-mix(in srgb, var(--hdrbg) 82%, transparent) 70%,
+    transparent);
   backdrop-filter:blur(6px);padding:20px 0 14px;border-bottom:1px solid var(--line)}
+.themebtn{background:var(--sunken);border:1px solid var(--line);color:var(--mut);border-radius:10px;
+  width:38px;height:38px;display:grid;place-items:center;cursor:pointer;font-size:16px;transition:.15s;flex:0 0 auto}
+.themebtn:hover{border-color:var(--blue);color:var(--blue2)}
 .hrow{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap}
 .brand{display:flex;align-items:center;gap:13px}
 .logo{width:40px;height:40px;flex:0 0 40px;border-radius:11px;
@@ -66,14 +79,14 @@ h2{font-size:26px;font-weight:600;letter-spacing:-.6px;margin-bottom:5px}
 
 /* projection highlight */
 .hero-proj{border:1px solid #f4a93b40;box-shadow:0 0 0 1px #f4a93b18, 0 10px 40px -12px #00000060}
-.toggle{display:inline-flex;gap:4px;background:#0c1c3c;border:1px solid var(--line);border-radius:10px;padding:4px;margin-left:auto}
+.toggle{display:inline-flex;gap:4px;background:var(--sunken);border:1px solid var(--line);border-radius:10px;padding:4px;margin-left:auto}
 .toggle button{background:none;border:0;color:var(--mut);font-family:'Space Grotesk';font-size:12.5px;font-weight:600;
   padding:6px 12px;border-radius:7px;cursor:pointer;transition:.15s}
 .toggle button.on{background:var(--amber);color:#241503}
 .cardhead{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap}
 .cardhead h3{margin:0} .cardhead .h3sub{margin:0}
 .peakcalls{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px}
-.pc{background:#0c1c3c;border:1px solid var(--line);border-radius:12px;padding:13px 15px}
+.pc{background:var(--sunken);border:1px solid var(--line);border-radius:12px;padding:13px 15px}
 .pc .t{font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.5px}
 .pc .v{font-family:'Space Grotesk';font-size:20px;font-weight:700;margin-top:3px}
 .pc.peak .v{color:var(--amber)} .pc.low .v{color:var(--blue2)} .pc.avg .v{color:var(--green)}
@@ -104,7 +117,7 @@ footer{margin-top:50px;padding-top:22px;border-top:1px solid var(--line);color:v
   background:var(--panel);border:1px solid var(--line);border-radius:13px}
 .fgroup{display:flex;flex-direction:column;gap:4px}
 .fgroup label{font-size:10.5px;color:var(--mut);text-transform:uppercase;letter-spacing:.4px}
-.fgroup select,.fgroup input[type=number]{background:#0c1c3c;color:var(--txt);border:1px solid var(--line);
+.fgroup select,.fgroup input[type=number]{background:var(--sunken);color:var(--txt);border:1px solid var(--line);
   border-radius:8px;padding:7px 9px;font-family:'Inter',sans-serif;font-size:12.5px;min-width:130px}
 .fgroup select:focus,.fgroup input:focus{outline:1px solid var(--blue)}
 .fbtn{background:none;border:1px solid var(--line);color:var(--mut);border-radius:8px;padding:8px 13px;
@@ -128,7 +141,7 @@ footer{margin-top:50px;padding-top:22px;border-top:1px solid var(--line);color:v
 .objbox{display:flex;flex-direction:column;gap:4px}
 .objbox label{font-size:10.5px;color:var(--mut);text-transform:uppercase;letter-spacing:.4px}
 .objbox .orow{display:flex;gap:8px;align-items:center}
-.objbox input{width:120px;background:#0c1c3c;color:var(--txt);border:1px solid var(--line);border-radius:8px;
+.objbox input{width:120px;background:var(--sunken);color:var(--txt);border:1px solid var(--line);border-radius:8px;
   padding:7px 9px;font-family:'Space Grotesk';font-size:13px}
 .objhint{font-size:11px;color:var(--dim)}
 table.ptab{width:100%;border-collapse:collapse;margin-top:14px;font-size:12px}
@@ -141,7 +154,7 @@ table.ptab tr.realrow td{background:#46c79a12}
 .qualproj{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
 
 /* ---- tabs (Reporte / Presupuesto) ---- */
-.tabnav{display:flex;gap:6px;background:#0c1c3c;border:1px solid var(--line);border-radius:11px;padding:4px;margin-left:8px}
+.tabnav{display:flex;gap:6px;background:var(--sunken);border:1px solid var(--line);border-radius:11px;padding:4px;margin-left:8px}
 .tabnav button{background:none;border:0;color:var(--mut);font-family:'Space Grotesk';font-size:12.5px;font-weight:600;
   padding:8px 15px;border-radius:8px;cursor:pointer;transition:.15s}
 .tabnav button.on{background:var(--blue);color:#06152e}
@@ -184,6 +197,7 @@ table.ptab tr.realrow td{background:#46c79a12}
         <button data-view="reporte" class="on">Reporte de Traducciones</button>
         <button data-view="presupuesto">Presupuesto</button>
       </div>
+      <button class="themebtn" id="themeToggle" type="button" title="Cambiar a modo claro" aria-label="Cambiar a modo claro">🌙</button>
       <div class="stamp"><span id="stampRange"></span><br><span id="stampMeses"></span><br><span id="gen"></span></div>
     </div>
   </div>
@@ -482,10 +496,44 @@ const MESES_ABR = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','
 $('gen').textContent = 'Actualizado ' + (META.actualizado || '');
 $('prodToggle').innerHTML = PRODS.map(p=>`<button data-p="${p}"${p===(META.prod_default||PRODS[Math.floor(PRODS.length/2)])?' class="on"':''}>${p}/mes</button>`).join('');
 
-const C={bg:'#0a1730',blue:'#4fa3f7',blue2:'#7ed0ff',amber:'#f4a93b',red:'#e5595b',green:'#46c79a',mut:'#93a6c9',line:'#26386070',txt:'#eaf0fb'};
-Chart.defaults.color=C.mut; Chart.defaults.font.family="'Inter',sans-serif"; Chart.defaults.font.size=11;
-const grid={color:C.line,drawTicks:false}; const noGrid={display:false};
-const vcol={'WH Vendor':C.blue,'WC Vendor':C.blue2,'HT Vendor':C.green,'--No Vendor--':'#6b7fa8'};
+// =====================================================================
+// TEMA — claro/oscuro. C/grid son mutables: se reasignan al cambiar de
+// tema y se vuelven a dibujar todos los gráficos (Chart.js no sigue
+// variables CSS solo, hay que empujarle los colores nuevos).
+// =====================================================================
+const THEMES = {
+  dark:  {bg:'#0a1730',blue:'#4fa3f7',blue2:'#7ed0ff',amber:'#f4a93b',red:'#e5595b',green:'#46c79a',mut:'#93a6c9',line:'#26386070',txt:'#eaf0fb'},
+  light: {bg:'#f4f7fc',blue:'#2f6fd6',blue2:'#0f7fc4',amber:'#b8720f',red:'#c9393c',green:'#188f68',mut:'#5c6b8a',line:'#c3d0e6',txt:'#182238'},
+};
+let C = Object.assign({}, THEMES.dark);
+Chart.defaults.font.family="'Inter',sans-serif"; Chart.defaults.font.size=11;
+let grid={color:C.line,drawTicks:false}; const noGrid={display:false};
+
+function currentTheme(){ return document.documentElement.getAttribute('data-theme')==='light' ? 'light' : 'dark'; }
+function applyThemePalette(){
+  Object.assign(C, THEMES[currentTheme()]);
+  Chart.defaults.color = C.mut;
+  grid.color = C.line;
+}
+function setTheme(theme){
+  document.documentElement.setAttribute('data-theme', theme);
+  try{ localStorage.setItem('theme', theme); }catch(e){}
+  $('themeToggle').textContent = theme==='light' ? '☀️' : '🌙';
+  $('themeToggle').title = theme==='light' ? 'Cambiar a modo oscuro' : 'Cambiar a modo claro';
+  applyThemePalette();
+  if(lastD2) renderAll(lastD2);
+  if(SRC_BUDGET) computeAndRenderBudget();
+}
+(function initTheme(){
+  let saved = null;
+  try{ saved = localStorage.getItem('theme'); }catch(e){}
+  const theme = saved==='light' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', theme);
+  $('themeToggle').textContent = theme==='light' ? '☀️' : '🌙';
+  $('themeToggle').title = theme==='light' ? 'Cambiar a modo oscuro' : 'Cambiar a modo claro';
+  applyThemePalette();
+})();
+$('themeToggle').addEventListener('click', ()=> setTheme(currentTheme()==='light' ? 'dark' : 'light'));
 
 function median(arr){ if(!arr.length) return 0; const s=arr.slice().sort((a,b)=>a-b); const m=s.length>>1; return s.length%2? s[m] : (s[m-1]+s[m])/2; }
 function madOf(arr, med){ return median(arr.map(x=>Math.abs(x-med))) || 1; }
@@ -759,6 +807,7 @@ function renderProjTable(D2){
 }
 
 function renderAll(D2){
+  const vcol={'WH Vendor':C.blue,'WC Vendor':C.blue2,'HT Vendor':C.green,'--No Vendor--':'#6b7fa8'};
   $('stampRange').innerHTML = 'Histórico <b>'+(D2.meta.fy_min||'')+' – '+(D2.meta.fy_max||'')+'</b>';
   $('stampMeses').textContent = (D2.kpi.meses||'')+' meses · proyección '+(D2.proyeccion.fy||'');
   $('trendRange').textContent = D2.meta.rango || '';
@@ -896,7 +945,6 @@ function renderAll(D2){
 // PRESUPUESTO — motor de cálculo y render, independiente del reporte de
 // traducciones (su propia fuente, filtros y carga de Excel).
 // =====================================================================
-const TCOL = {'General':C.blue,'WH':C.green,'Otros':C.amber};
 
 function calcularBudget(src, filt){
   const raw = src.raw, lu = src.lookup, n = raw.fy.length;
@@ -1026,6 +1074,7 @@ function procesarFilasBudget(matriz){
 }
 
 function renderBudget(RB){
+  const TCOL = {'General':C.blue,'WH':C.green,'Otros':C.amber};
   const k = RB.kpi;
   const cards = [
     ['blue', fmt(k.budget), 'Budget total'],
