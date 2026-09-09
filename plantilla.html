@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 :root{
@@ -197,7 +198,7 @@ table.ptab tr.realrow td{background:#46c79a12}
         <button data-view="reporte" class="on">Reporte de Traducciones</button>
         <button data-view="presupuesto">Presupuesto</button>
       </div>
-      <button class="themebtn" id="themeToggle" type="button" title="Cambiar a modo claro" aria-label="Cambiar a modo claro">🌙</button>
+      <button class="themebtn" id="themeToggle" type="button" title="Cambiar a modo claro" aria-label="Cambiar a modo claro">☀️</button>
       <div class="stamp"><span id="stampRange"></span><br><span id="stampMeses"></span><br><span id="gen"></span></div>
     </div>
   </div>
@@ -488,7 +489,9 @@ const D = __DATA__;
 const RAW = D.raw, LU = D.lookup, META = D.meta || {};
 const $ = id => document.getElementById(id);
 const fmt = n => Math.round(n).toLocaleString('es-PE');
+const fmtMil = n => { if(Math.abs(n)<1000) return fmt(n); const r = Math.round(n/1000); return (r===0?fmt(n):fmt(r)+'mil'); };
 const pct = (a,b) => b ? Math.round(a/b*10000)/100 : 0;
+if(window.ChartDataLabels){ Chart.register(ChartDataLabels); Chart.defaults.set('plugins.datalabels', {display:false}); }
 const FYORDER = META.fyorder || ['01.Jul','02.Ago','03.Sep','04.Oct','05.Nov','06.Dic','07.Ene','08.Feb','09.Mar','10.Abr','11.May','12.Jun'];
 const PRODS = META.productividades || [500,560,600];
 const MESES_ABR = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -518,7 +521,7 @@ function applyThemePalette(){
 function setTheme(theme){
   document.documentElement.setAttribute('data-theme', theme);
   try{ localStorage.setItem('theme', theme); }catch(e){}
-  $('themeToggle').textContent = theme==='light' ? '☀️' : '🌙';
+  $('themeToggle').textContent = theme==='light' ? '🌙' : '☀️';
   $('themeToggle').title = theme==='light' ? 'Cambiar a modo oscuro' : 'Cambiar a modo claro';
   applyThemePalette();
   if(lastD2) renderAll(lastD2);
@@ -529,7 +532,7 @@ function setTheme(theme){
   try{ saved = localStorage.getItem('theme'); }catch(e){}
   const theme = saved==='light' ? 'light' : 'dark';
   document.documentElement.setAttribute('data-theme', theme);
-  $('themeToggle').textContent = theme==='light' ? '☀️' : '🌙';
+  $('themeToggle').textContent = theme==='light' ? '🌙' : '☀️';
   $('themeToggle').title = theme==='light' ? 'Cambiar a modo oscuro' : 'Cambiar a modo claro';
   applyThemePalette();
 })();
@@ -836,19 +839,21 @@ function renderAll(D2){
     label:'Volumen',order:2,
     data:D2.serie.vol,borderColor:C.blue,borderWidth:2,tension:.35,pointRadius:2,pointHoverRadius:5,
     pointBackgroundColor:D2.serie.vol.map((v,i)=>{const m=D2.serie.fecha[i];return(m.startsWith('Nov')||m.startsWith('Dec'))?C.amber:C.blue}),
-    fill:true,backgroundColor:(ctx)=>{const g=ctx.chart.ctx.createLinearGradient(0,0,0,300);g.addColorStop(0,'#4fa3f733');g.addColorStop(1,'#4fa3f700');return g}
+    fill:true,backgroundColor:(ctx)=>{const g=ctx.chart.ctx.createLinearGradient(0,0,0,300);g.addColorStop(0,'#4fa3f733');g.addColorStop(1,'#4fa3f700');return g},
+    datalabels:{display:'auto',formatter:v=>fmtMil(v),color:C.mut,font:{size:9},align:'top',offset:4}
   },{
     label:'Promedio',order:1,data:D2.serie.vol.map(()=>trendAvg),borderColor:C.green,borderWidth:2,
     borderDash:[6,5],pointRadius:0,pointHoverRadius:0,tension:0,fill:false
   }]},options:{maintainAspectRatio:false,plugins:{legend:{display:true,labels:{usePointStyle:true,boxWidth:8},align:'end'},
     tooltip:{callbacks:{label:c=>c.dataset.label+': '+fmt(c.raw)+' traducciones'}}},
-    scales:{x:{grid:noGrid,ticks:{maxTicksLimit:14,autoSkip:true}},y:{grid:grid,ticks:{callback:v=>v/1000+'k'}}}}});
+    scales:{x:{grid:noGrid,ticks:{maxTicksLimit:14,autoSkip:true}},y:{grid:grid,ticks:{callback:v=>fmtMil(v)}}}}});
 
   destroyChart('season');
   charts.season = new Chart(cSeason,{type:'bar',data:{labels:D2.estacional.mes,datasets:[{data:D2.estacional.vol,
-    backgroundColor:D2.estacional.vol.map(v=>v>36000?C.amber:'#3a6fc4'),borderRadius:5}]},
+    backgroundColor:D2.estacional.vol.map(v=>v>36000?C.amber:'#3a6fc4'),borderRadius:5,
+    datalabels:{display:true,formatter:v=>fmtMil(v),color:C.mut,font:{size:10},anchor:'end',align:'top'}}]},
     options:{maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>fmt(c.raw)}}},
-    scales:{x:{grid:noGrid},y:{grid:grid,ticks:{callback:v=>v/1000+'k'}}}}});
+    scales:{x:{grid:noGrid},y:{grid:grid,ticks:{callback:v=>fmtMil(v)}}}}});
 
   destroyChart('annual');
   charts.annual = new Chart(cAnnual,{type:'bar',data:{labels:D2.anual.fy,datasets:[{data:D2.anual.vol,
@@ -861,14 +866,16 @@ function renderAll(D2){
   const realIdx=D2.proyeccion.mes.indexOf(D2.proyeccion.real_hasta);
   destroyChart('proj');
   charts.proj = new Chart(cProj,{data:{labels:D2.proyeccion.mes,datasets:[
-    {type:'bar',label:'Volumen proyectado',data:D2.proyeccion.vol,yAxisID:'y',borderRadius:5,
-     backgroundColor:D2.proyeccion.vol.map((v,i)=>i<=realIdx?C.green:'#3a6fc4')},
-    {type:'line',label:'Traductores necesarios',data:need,yAxisID:'y1',borderColor:C.amber,
-     borderWidth:3,tension:.35,pointRadius:4,pointBackgroundColor:C.amber,pointBorderColor:C.bg}
+    {type:'bar',label:'Volumen proyectado',order:2,data:D2.proyeccion.vol,yAxisID:'y',borderRadius:5,
+     backgroundColor:D2.proyeccion.vol.map((v,i)=>i<=realIdx?C.green:'#3a6fc4'),
+     datalabels:{display:true,formatter:v=>fmtMil(v),color:C.mut,font:{size:9},anchor:'end',align:'top'}},
+    {type:'line',label:'Traductores necesarios',order:1,data:need,yAxisID:'y1',borderColor:C.amber,
+     borderWidth:3,tension:.35,pointRadius:4,pointBackgroundColor:C.amber,pointBorderColor:C.bg,pointBorderWidth:2,
+     datalabels:{display:true,formatter:v=>Math.round(v),color:C.amber,font:{size:10,weight:'bold'},anchor:'end',align:'bottom',offset:2}}
    ]},options:{maintainAspectRatio:false,plugins:{legend:{labels:{usePointStyle:true,boxWidth:8},position:'top',align:'end'},
      tooltip:{callbacks:{label:c=>c.dataset.yAxisID==='y1'?'~'+c.raw+' traductores':fmt(c.raw)+' traducciones'}}},
     scales:{x:{grid:noGrid},
-     y:{position:'left',grid:grid,ticks:{callback:v=>v/1000+'k'},title:{display:true,text:'Traducciones',color:C.mut}},
+     y:{position:'left',grid:grid,ticks:{callback:v=>fmtMil(v)},title:{display:true,text:'Traducciones',color:C.mut}},
      y1:{position:'right',grid:noGrid,min:0,suggestedMax:100,title:{display:true,text:'Traductores',color:C.amber}}}}});
   const vals=need.slice(); const peak=Math.max(...vals); const peakM=D2.proyeccion.mes[vals.indexOf(peak)];
   const noJul=vals.map((v,i)=>i===realIdx?999:v); const low=Math.min(...noJul); const lowM=D2.proyeccion.mes[noJul.indexOf(low)];
@@ -892,8 +899,10 @@ function renderAll(D2){
 
   destroyChart('qual');
   charts.qual = new Chart(cQual,{type:'line',data:{labels:D2.serie.fecha,datasets:[
-   {label:'% Issues',data:D2.serie.tasa_iss,borderColor:C.red,borderWidth:2,tension:.3,pointRadius:0,pointHoverRadius:4},
-   {label:'% Retorno',data:D2.serie.tasa_ret,borderColor:C.amber,borderWidth:2,tension:.3,pointRadius:0,pointHoverRadius:4,borderDash:[5,4]}
+   {label:'% Issues',data:D2.serie.tasa_iss,borderColor:C.red,borderWidth:2,tension:.3,pointRadius:0,pointHoverRadius:4,
+    datalabels:{display:'auto',formatter:v=>v+'%',color:C.red,font:{size:9},align:'top',offset:3}},
+   {label:'% Retorno',data:D2.serie.tasa_ret,borderColor:C.amber,borderWidth:2,tension:.3,pointRadius:0,pointHoverRadius:4,borderDash:[5,4],
+    datalabels:{display:'auto',formatter:v=>v+'%',color:C.amber,font:{size:9},align:'bottom',offset:3}}
   ]},options:{maintainAspectRatio:false,plugins:{legend:{labels:{usePointStyle:true,boxWidth:8},align:'end'},
     tooltip:{callbacks:{label:c=>c.dataset.label+': '+c.raw+'%'}}},
    scales:{x:{grid:noGrid,ticks:{maxTicksLimit:12}},y:{grid:grid,ticks:{callback:v=>v+'%'}}}}});
