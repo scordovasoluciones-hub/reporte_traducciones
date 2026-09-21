@@ -6,9 +6,9 @@ Engagement Site de SharePoint.
 
 ## Estructura
 
-    datos/            <- coloca aquí el CSV histórico (el script toma el más reciente)
-                         y datos/presupuesto.xlsx con la hoja "PagoTraducciones" (opcional:
-                         si no está, se omite la pestaña Presupuesto)
+    datos/            <- CSV histórico (el script toma el más reciente) y presupuesto.xlsx
+                         con la hoja "PagoTraducciones" (opcional: si no está, se omite la
+                         pestaña Presupuesto). Ambos viven en el repo — ver "Refresco mensual".
     generar.py        <- lee el CSV y el Excel de presupuesto, valida calidad de dato,
                          exporta los datos GRANULARES de ambas fuentes
     plantilla.html    <- plantilla del dashboard (token __DATA__ + motor de cálculo en JS)
@@ -46,15 +46,22 @@ los filtros y la vista previa de un Excel nuevo cargado en el navegador.
 - **Cargar Excel/CSV** (vista previa, en cada pestaña): botón junto a los filtros para revisar
   cómo se vería el dashboard con datos nuevos, sin publicar nada — solo se ve en tu navegador.
 
-## Refresco mensual — publicar para todos (3 pasos)
+## Refresco mensual — publicar para todos (sin Python, sin terminal)
 
-    1. Reemplaza el CSV en datos/ (y datos/presupuesto.xlsx si también cambió) por la base actualizada.
-    2. python generar.py
-    3. git add -A && git commit -m "Actualiza datos a <mes>" && git push
+El CSV y el Excel de presupuesto viven **dentro del repositorio** (`datos/`), y GitHub
+Actions corre `generar.py` automáticamente en cada push a `main`. Actualizar es así:
 
-Con el flujo de CI en GitHub Actions, el push ya deja publicada la nueva versión.
-Antes de este paso puedes usar el botón "Cargar Excel" en el propio dashboard para
-previsualizar el mes nuevo y confirmar que se ve bien.
+    1. Antes de subir, usa el botón "Cargar Excel" en el propio dashboard para previsualizar
+       el mes nuevo en tu navegador y confirmar que se ve bien (no publica nada todavía).
+    2. En github.com, entra a la carpeta datos/.
+    3. "Add file" -> "Upload files" -> arrastra el CSV (y/o presupuesto.xlsx) actualizado
+       -> "Commit changes" directo a main.
+
+En ~1 minuto, la pestaña "Actions" del repo muestra el build corriendo y el sitio queda
+publicado con los datos nuevos. No hace falta instalar nada ni tocar la terminal.
+
+Si prefieres seguir el camino local (útil para depurar), sigue funcionando igual:
+`python generar.py` y luego `git add -A && git commit -m "..." && git push`.
 
 El script imprime alertas de calidad del dato (outliers, meses faltantes, anomalías de
 registro) y las muestra dentro del propio reporte; la carga de Excel en el navegador
@@ -82,10 +89,12 @@ de Azure Static Web Apps), así que la URL es pública para cualquiera que la te
 
 ## Notas de gobernanza
 
-Es data organizacional (volúmenes, calidad y traductores de Compassion Perú). Al estar en
-un repo público de GitHub y sin muro de acceso, la URL publicada es visible para cualquiera
-que la obtenga. Si esto deja de ser aceptable, las alternativas son: repo privado + GitHub
-Pro, Cloudflare Pages + Cloudflare Access (gratis, con login), o Azure Static Web Apps dentro
-del tenant de Compassion (usa `staticwebapp.config.json`, ya listo en este repo).
+Es data organizacional (volúmenes, calidad, traductores y presupuesto de Compassion Perú).
+El repo es público: cualquiera puede ver el dashboard publicado, **y también** entrar al
+repositorio y descargar el CSV y el Excel de presupuesto tal cual (`datos/`), no solo verlos
+procesados. Esto es una decisión consciente (se prioriza el self-service de actualizar sin
+Python/terminal) — si más adelante deja de ser aceptable, las alternativas son: repo privado +
+GitHub Pro, Cloudflare Pages + Cloudflare Access (gratis, con login), o Azure Static Web Apps
+dentro del tenant de Compassion (usa `staticwebapp.config.json`, ya listo en este repo).
 El dashboard es un snapshot: refleja el CSV con que se generó, no se conecta en vivo a Connect.
 Para datos en vivo con refresco automático, la vía nativa es Power BI sobre el mismo SharePoint.

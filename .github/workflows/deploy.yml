@@ -18,11 +18,22 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      # No se corre generar.py aquí: el CSV fuente nunca se sube a git (ver .gitignore),
-      # así que salida/index.html se genera EN TU MÁQUINA (paso 2 del refresco mensual,
-      # ver README) y se commitea ya generado. Este job solo publica lo que ya está en salida/.
+      # El CSV y el Excel de presupuesto SÍ se suben a git (ver .gitignore) — este job
+      # corre generar.py en cada push, así que actualizar el sitio es solo reemplazar
+      # el archivo en datos/ desde github.com, sin tocar Python ni la terminal.
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Instalar dependencias
+        run: pip install -r requirements.txt
+
+      - name: Generar dashboard
+        run: python generar.py
 
       - name: Preparar artefacto de Pages
         uses: actions/upload-pages-artifact@v3
