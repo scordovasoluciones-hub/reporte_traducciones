@@ -2,13 +2,13 @@
 """
 Generador del Reporte de Traducciones — Área de Engagement (SDS) · Compassion Perú.
 
-Flujo: lee el CSV histórico de datos/, calcula KPIs, estacionalidad, calidad,
-proyección de volumen y necesidad de traductores para el próximo año fiscal,
-valida la calidad del dato, e inyecta todo en plantilla.html -> salida/index.html.
+Flujo: lee el histórico de traducciones y el Excel de presupuesto de datos/ (CSV o
+Excel, cualquier nombre de archivo — se identifican por las columnas que tienen, no
+por el nombre), valida calidad de dato, e inyecta todo en plantilla.html -> salida/index.html.
 
 Uso:
-    python generar.py                      # usa el CSV más reciente en datos/
-    python generar.py datos/mi_base.csv    # usa un archivo específico
+    python generar.py                      # detecta los archivos de datos/ por su contenido
+    python generar.py datos/mi_base.csv    # fuerza un archivo específico como histórico
 """
 import sys, json, glob, datetime as dt
 import pandas as pd, numpy as np
@@ -33,14 +33,19 @@ def fecha_cal(r):
     return pd.Timestamp(int(y), int(r['MesNum']), 1)
 
 # ─────────────────────────── CARGA ───────────────────────────
+REQ_HISTORICO = ['VENDOR','TRANSLATOR NAME','TEMPLATE','TRANSLATION COUNT',
+                  'TRANSLATION CHECKS PERFORMED','RETURNED TO TRANSLATOR',
+                  'CONTENT ISSUES CONFIRMED','MesNum','MesFY','AñoFY']
+
+def leer_tabla(path, **kw):
+    """CSV o Excel según extensión — para que dé igual en qué formato llegue el archivo."""
+    return pd.read_csv(path, **kw) if path.lower().endswith('.csv') else pd.read_excel(path, sheet_name=0, **kw)
+
 def cargar(path):
-    df = pd.read_csv(path)
-    req = ['VENDOR','TRANSLATOR NAME','TEMPLATE','TRANSLATION COUNT',
-           'TRANSLATION CHECKS PERFORMED','RETURNED TO TRANSLATOR',
-           'CONTENT ISSUES CONFIRMED','MesNum','MesFY','AñoFY']
-    faltan = [c for c in req if c not in df.columns]
+    df = leer_tabla(path)
+    faltan = [c for c in REQ_HISTORICO if c not in df.columns]
     if faltan:
-        raise SystemExit(f"❌ Faltan columnas en el CSV: {faltan}")
+        raise SystemExit(f"❌ Faltan columnas en {path}: {faltan}")
     df['fecha']  = df.apply(fecha_cal, axis=1)
     df['forder'] = df['MesFY'].str[:2].astype(int)
     return df
@@ -138,7 +143,7 @@ BUDGET_COLS = ['fy', 'mes', 'cod_mes', 'cod_my', 'tipo', 'budget', 'q_lic',
                'pago_cartas', 'pago_total', 'q_cartas', 'costo_carta']
 
 def cargar_budget(path):
-    df = pd.read_excel(path, sheet_name=0)
+    df = leer_tabla(path)
     if len(df.columns) < len(BUDGET_COLS):
         raise SystemExit(f"❌ El Excel de presupuesto tiene {len(df.columns)} columnas, "
                           f"se esperaban {len(BUDGET_COLS)}.")
@@ -174,30 +179,60 @@ def render(D, alertas):
     open('salida/index.html', 'w', encoding='utf-8').write(html)
     json.dump(D, open('salida/datos.json', 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
 
+def clasificar_archivos(directorio='datos'):
+    """Detecta qué archivo de datos/ es cuál MIRANDO LAS COLUMNAS, no el nombre ni la
+    fecha de modificación — en GitHub Actions todos los archivos quedan con la misma
+    fecha al clonarse, así que "el más reciente" no sirve como criterio ahí."""
+    import os
+    candidatos = sorted(set(
+        glob.glob(f'{directorio}/*.csv') + glob.glob(f'{directorio}/*.CSV') +
+        glob.glob(f'{directorio}/*.xlsx') + glob.glob(f'{directorio}/*.xls')))
+    historico, presupuesto, ilegibles = [], [], []
+    for p in candidatos:
+        try:
+            muestra = leer_tabla(p, nrows=5)
+        except Exception as e:
+            ilegibles.append((p, str(e))); continue
+        if all(c in muestra.columns for c in REQ_HISTORICO):
+            historico.append(p)
+        elif len(muestra.columns) >= len(BUDGET_COLS):
+            presupuesto.append(p)
+        else:
+            ilegibles.append((p, f"{len(muestra.columns)} columnas, no coincide con ningún formato conocido"))
+    return historico, presupuesto, ilegibles
+
 def main():
     args = [a for a in sys.argv[1:] if not a.startswith('-')]
+    historico, presupuesto, ilegibles = clasificar_archivos()
+    for p, err in ilegibles:
+        print(f"ℹ  Ignorado (no reconocido): {p} — {err}")
+
     if args:
         path = args[0]
+    elif not historico:
+        raise SystemExit("❌ No encontré ningún archivo de traducciones (CSV/Excel) reconocible en datos/.")
+    elif len(historico) > 1:
+        raise SystemExit(
+            "❌ Hay más de un archivo de traducciones en datos/: " + ", ".join(historico) +
+            ". Borra el que ya no uses (déjalo con exactamente uno) y vuelve a intentar.")
     else:
-        cands = sorted(glob.glob('datos/*.csv') + glob.glob('datos/*.CSV'),
-                       key=lambda p: __import__('os').path.getmtime(p))
-        if not cands:
-            raise SystemExit("❌ No hay CSV en datos/. Coloca la base ahí o pásala como argumento.")
-        path = cands[-1]
+        path = historico[0]
     print(f"📄 Fuente: {path}")
     df = cargar(path)
     alertas, out_fechas = validar(df)
     D = construir(df, out_fechas)
 
-    bpath_cands = sorted(glob.glob('datos/*.xlsx') + glob.glob('datos/*.xls'),
-                          key=lambda p: __import__('os').path.getmtime(p))
-    if bpath_cands:
-        bpath = bpath_cands[-1]
+    if not presupuesto:
+        print("ℹ  No hay Excel de presupuesto reconocible en datos/ — se omite la pestaña Presupuesto.")
+        D['budget'] = None
+    elif len(presupuesto) > 1:
+        raise SystemExit(
+            "❌ Hay más de un archivo de presupuesto en datos/: " + ", ".join(presupuesto) +
+            ". Borra el que ya no uses (déjalo con exactamente uno) y vuelve a intentar.")
+    else:
+        bpath = presupuesto[0]
         print(f"📄 Fuente presupuesto: {bpath}")
         D['budget'] = construir_budget(cargar_budget(bpath))
-    else:
-        print("ℹ  No hay Excel de presupuesto en datos/ — se omite la pestaña Presupuesto.")
-        D['budget'] = None
 
     render(D, alertas)
     total = int(sum(D['raw']['v']))

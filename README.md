@@ -6,9 +6,10 @@ Engagement Site de SharePoint.
 
 ## Estructura
 
-    datos/            <- CSV histórico (el script toma el más reciente) y presupuesto.xlsx
-                         con la hoja "PagoTraducciones" (opcional: si no está, se omite la
-                         pestaña Presupuesto). Ambos viven en el repo — ver "Refresco mensual".
+    datos/            <- histórico de traducciones y Excel de presupuesto. Cualquier
+                         nombre de archivo sirve (CSV o Excel) — generar.py identifica
+                         cuál es cuál por las columnas, no por el nombre. Debe haber
+                         exactamente UNO de cada tipo (si subes uno nuevo, borra el viejo).
     generar.py        <- lee el CSV y el Excel de presupuesto, valida calidad de dato,
                          exporta los datos GRANULARES de ambas fuentes
     plantilla.html    <- plantilla del dashboard (token __DATA__ + motor de cálculo en JS)
@@ -53,12 +54,19 @@ Actions corre `generar.py` automáticamente en cada push a `main`. Actualizar es
 
     1. Antes de subir, usa el botón "Cargar Excel" en el propio dashboard para previsualizar
        el mes nuevo en tu navegador y confirmar que se ve bien (no publica nada todavía).
-    2. En github.com, entra a la carpeta datos/.
-    3. "Add file" -> "Upload files" -> arrastra el CSV (y/o presupuesto.xlsx) actualizado
-       -> "Commit changes" directo a main.
+    2. En github.com, entra a la carpeta datos/ y BORRA el archivo que vas a reemplazar
+       (el de traducciones o el de presupuesto, según cuál actualizaste).
+    3. Ve a https://github.com/scordovasoluciones-hub/reporte_traducciones/upload/main/datos
+       y arrastra tu archivo actualizado (con el nombre que quieras, CSV o Excel) ->
+       "Commit changes" directo a main.
 
 En ~1 minuto, la pestaña "Actions" del repo muestra el build corriendo y el sitio queda
 publicado con los datos nuevos. No hace falta instalar nada ni tocar la terminal.
+
+`generar.py` detecta cuál archivo es cuál mirando sus columnas, no el nombre — pero debe
+haber **exactamente uno** de cada tipo en `datos/`. Si subes uno nuevo sin borrar el viejo,
+el build falla con un mensaje claro pidiéndote que borres el que sobra (revisa la pestaña
+"Actions" si el sitio no se actualiza).
 
 Si prefieres seguir el camino local (útil para depurar), sigue funcionando igual:
 `python generar.py` y luego `git add -A && git commit -m "..." && git push`.
